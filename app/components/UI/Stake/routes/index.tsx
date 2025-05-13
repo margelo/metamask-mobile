@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import Routes from '../../../../constants/navigation/Routes';
@@ -28,34 +31,34 @@ const clearStackNavigatorOptions = {
 const StakeScreenStack = () => (
   <StakeSDKProvider>
     <Stack.Navigator>
-      <Stack.Screen name={Routes.STAKING.STAKE} component={EarnInputView} />
+      <Stack.Screen name={Routes.STAKING.STAKE} getComponent={() => require('../../Earn/Views/EarnInputView/EarnInputView').default} />
       <Stack.Screen
         name={Routes.STAKING.UNSTAKE}
-        component={EarnWithdrawInputView}
+        getComponent={() => require('../../Earn/Views/EarnWithdrawInputView/EarnWithdrawInputView').default}
       />
       <Stack.Screen
         name={Routes.STAKING.STAKE_CONFIRMATION}
-        component={StakeConfirmationView}
+        getComponent={() => require('../Views/StakeConfirmationView/StakeConfirmationView').default}
       />
       <Stack.Screen
         name={Routes.STAKING.UNSTAKE_CONFIRMATION}
-        component={UnstakeConfirmationView}
+        getComponent={() => require('../Views/UnstakeConfirmationView/UnstakeConfirmationView').default}
       />
       <Stack.Screen
         name={Routes.STAKING.EARNINGS_HISTORY}
-        component={StakeEarningsHistoryView}
+        getComponent={() => require('../Views/StakeEarningsHistoryView/StakeEarningsHistoryView').default}
       />
       <Stack.Screen
         name={Routes.STANDALONE_CONFIRMATIONS.STAKE_DEPOSIT}
-        component={Confirm}
+        getComponent={() => require('../../../Views/confirmations/components/confirm').Confirm}
       />
       <Stack.Screen
         name={Routes.STANDALONE_CONFIRMATIONS.STAKE_WITHDRAWAL}
-        component={Confirm}
+        getComponent={() => require('../../../Views/confirmations/components/confirm').Confirm}
       />
       <Stack.Screen
         name={Routes.STANDALONE_CONFIRMATIONS.STAKE_CLAIM}
-        component={Confirm}
+        getComponent={() => require('../../../Views/confirmations/components/confirm').Confirm}
       />
     </Stack.Navigator>
   </StakeSDKProvider>
@@ -70,22 +73,22 @@ const StakeModalStack = () => (
     >
       <ModalStack.Screen
         name={Routes.STAKING.MODALS.LEARN_MORE}
-        component={PoolStakingLearnMoreModal}
+        getComponent={() => require('../components/PoolStakingLearnMoreModal').default}
         options={{ headerShown: false }}
       />
       <ModalStack.Screen
         name={Routes.STAKING.MODALS.MAX_INPUT}
-        component={MaxInputModal}
+        getComponent={() => require('../../Earn/components/MaxInputModal').default}
         options={{ headerShown: false }}
       />
       <ModalStack.Screen
         name={Routes.STAKING.MODALS.GAS_IMPACT}
-        component={GasImpactModal}
+        getComponent={() => require('../components/GasImpactModal').default}
         options={{ headerShown: false }}
       />
       <ModalStack.Screen
         name={Routes.STAKING.MODALS.EARN_TOKEN_LIST}
-        component={EarnTokenList}
+        getComponent={() => require('../../Earn/components/EarnTokenList').default}
         options={{ headerShown: false }}
       />
     </ModalStack.Navigator>

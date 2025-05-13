@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import Regions from '../Views/Regions';
@@ -15,21 +18,21 @@ const Stack = createStackNavigator();
 const RampRoutes = ({ rampType }: { rampType: RampType }) => (
   <RampSDKProvider rampType={rampType}>
     <Stack.Navigator initialRouteName={Routes.RAMP.GET_STARTED}>
-      <Stack.Screen name={Routes.RAMP.GET_STARTED} component={GetStarted} />
+      <Stack.Screen name={Routes.RAMP.GET_STARTED} getComponent={() => require('../Views/GetStarted').default} />
       <Stack.Screen
         name={Routes.RAMP.NETWORK_SWITCHER}
-        component={NetworkSwitcher}
+        getComponent={() => require('../Views/NetworkSwitcher').default}
         options={{ animationEnabled: false }}
       />
-      <Stack.Screen name={Routes.RAMP.BUILD_QUOTE} component={BuildQuote} />
+      <Stack.Screen name={Routes.RAMP.BUILD_QUOTE} getComponent={() => require('../Views/BuildQuote').default} />
       <Stack.Screen
         name={Routes.RAMP.BUILD_QUOTE_HAS_STARTED}
-        component={BuildQuote}
+        getComponent={() => require('../Views/BuildQuote').default}
         options={{ animationEnabled: false }}
       />
       <Stack.Screen
         name={Routes.RAMP.QUOTES}
-        component={Quotes}
+        getComponent={() => require('../Views/Quotes').default}
         options={{
           headerShown: false,
           cardStyle: { backgroundColor: colors.transparent },
@@ -38,11 +41,11 @@ const RampRoutes = ({ rampType }: { rampType: RampType }) => (
           detachPreviousScreen: false,
         }}
       />
-      <Stack.Screen name={Routes.RAMP.CHECKOUT} component={CheckoutWebView} />
-      <Stack.Screen name={Routes.RAMP.REGION} component={Regions} />
+      <Stack.Screen name={Routes.RAMP.CHECKOUT} getComponent={() => require('../Views/Checkout').default} />
+      <Stack.Screen name={Routes.RAMP.REGION} getComponent={() => require('../Views/Regions').default} />
       <Stack.Screen
         name={Routes.RAMP.REGION_HAS_STARTED}
-        component={Regions}
+        getComponent={() => require('../Views/Regions').default}
         options={{ animationEnabled: false }}
       />
     </Stack.Navigator>

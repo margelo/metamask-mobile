@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import Routes from '../../../constants/navigation/Routes';
@@ -7,7 +10,6 @@ import SlippageModal from './components/SlippageModal';
 import { BridgeSourceNetworkSelector } from './components/BridgeSourceNetworkSelector';
 import { BridgeDestNetworkSelector } from './components/BridgeDestNetworkSelector';
 import QuoteInfoModal from './components/QuoteInfoModal';
-import BridgeView from './Views/BridgeView';
 import BlockExplorersModal from './components/TransactionDetails/BlockExplorersModal';
 import QuoteExpiredModal from './components/QuoteExpiredModal';
 
@@ -22,7 +24,7 @@ const clearStackNavigatorOptions = {
 const Stack = createStackNavigator();
 export const BridgeScreenStack = () => (
   <Stack.Navigator>
-    <Stack.Screen name="BridgeView" component={BridgeView} />
+    <Stack.Screen name="BridgeView" getComponent={() => require('./Views/BridgeView').default} />
   </Stack.Navigator>
 );
 
@@ -34,35 +36,35 @@ export const BridgeModalStack = () => (
   >
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.SOURCE_TOKEN_SELECTOR}
-      component={BridgeSourceTokenSelector}
+      getComponent={() => require('./components/BridgeSourceTokenSelector').BridgeSourceTokenSelector}
     />
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.DEST_TOKEN_SELECTOR}
-      component={BridgeDestTokenSelector}
+      getComponent={() => require('./components/BridgeDestTokenSelector').BridgeDestTokenSelector}
     />
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.SOURCE_NETWORK_SELECTOR}
-      component={BridgeSourceNetworkSelector}
+      getComponent={() => require('./components/BridgeSourceNetworkSelector').BridgeSourceNetworkSelector}
     />
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.DEST_NETWORK_SELECTOR}
-      component={BridgeDestNetworkSelector}
+      getComponent={() => require('./components/BridgeDestNetworkSelector').BridgeDestNetworkSelector}
     />
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.SLIPPAGE_MODAL}
-      component={SlippageModal}
+      getComponent={() => require('./components/SlippageModal').default}
     />
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.QUOTE_INFO_MODAL}
-      component={QuoteInfoModal}
+      getComponent={() => require('./components/QuoteInfoModal').default}
     />
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.TRANSACTION_DETAILS_BLOCK_EXPLORER}
-      component={BlockExplorersModal}
+      getComponent={() => require('./components/TransactionDetails/BlockExplorersModal').default}
     />
     <ModalStack.Screen
       name={Routes.BRIDGE.MODALS.QUOTE_EXPIRED_MODAL}
-      component={QuoteExpiredModal}
+      getComponent={() => require('./components/QuoteExpiredModal').default}
     />
   </ModalStack.Navigator>
 );

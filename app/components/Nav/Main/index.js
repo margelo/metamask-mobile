@@ -552,10 +552,10 @@ const MainFlow = () => (
       headerShown: false,
     }}
   >
-    <Stack.Screen name={'Main'} component={ConnectedMain} />
+    <Stack.Screen name={'Main'} getComponent={() => ConnectedMain} />
     <Stack.Screen
       name={'ReviewModal'}
-      component={ReviewModal}
+      getComponent={() => require('../../UI/ReviewModal').default}
       options={{ animationEnabled: false }}
     />
   </Stack.Navigator>

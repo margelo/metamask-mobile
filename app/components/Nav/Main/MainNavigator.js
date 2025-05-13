@@ -123,7 +123,7 @@ const WalletModalFlow = () => (
   <Stack.Navigator mode={'modal'} screenOptions={clearStackNavigatorOptions}>
     <Stack.Screen
       name={'Wallet'}
-      component={Wallet}
+      getComponent={() => require('../../Views/Wallet').default}
       options={{ headerShown: true, animationEnabled: false }}
     />
   </Stack.Navigator>
@@ -134,12 +134,12 @@ const AssetStackFlow = (props) => (
   <Stack.Navigator>
     <Stack.Screen
       name={'Asset'}
-      component={Asset}
+      getComponent={() => require('../../Views/Asset').default}
       initialParams={props.route.params}
     />
     <Stack.Screen
       name={'AssetDetails'}
-      component={AssetDetails}
+      getComponent={() => require('../../Views/AssetDetails').default}
       initialParams={{ address: props.route.params?.address }}
     />
   </Stack.Navigator>
@@ -153,7 +153,7 @@ const AssetModalFlow = (props) => (
   >
     <Stack.Screen
       name={'AssetStackFlow'}
-      component={AssetStackFlow}
+      getComponent={() => AssetStackFlow}
       initialParams={props.route.params}
     />
   </Stack.Navigator>
@@ -164,27 +164,27 @@ const WalletTabStackFlow = () => (
   <Stack.Navigator initialRouteName={'WalletView'}>
     <Stack.Screen
       name="WalletView"
-      component={WalletModalFlow}
+      getComponent={() => WalletModalFlow}
       options={{ headerShown: false }}
     />
     <Stack.Screen
       name="AddAsset"
-      component={AddAsset}
+      getComponent={() => require('../../Views/AddAsset').default}
       options={AddAsset.navigationOptions}
     />
     <Stack.Screen
       name="Collectible"
-      component={Collectible}
+      getComponent={() => require('../../Views/Collectible').default}
       options={Collectible.navigationOptions}
     />
     <Stack.Screen
       name="ConfirmAddAsset"
-      component={ConfirmAddAsset}
+      getComponent={() => require('../../UI/ConfirmAddAsset').default}
       options={ConfirmAddAsset.navigationOptions}
     />
     <Stack.Screen
       name="RevealPrivateCredentialView"
-      component={RevealPrivateCredential}
+      getComponent={() => require('../../Views/RevealPrivateCredential').RevealPrivateCredential}
     />
   </Stack.Navigator>
 );
@@ -193,7 +193,7 @@ const WalletTabModalFlow = () => (
   <Stack.Navigator mode={'modal'} screenOptions={clearStackNavigatorOptions}>
     <Stack.Screen
       name={Routes.WALLET.TAB_STACK_FLOW}
-      component={WalletTabStackFlow}
+      getComponent={() => WalletTabStackFlow}
     />
   </Stack.Navigator>
 );
@@ -202,17 +202,17 @@ const TransactionsHome = () => (
   <Stack.Navigator>
     <Stack.Screen
       name={Routes.TRANSACTIONS_VIEW}
-      component={ActivityView}
+      getComponent={() => require('../../Views/ActivityView').default}
       options={{ headerShown: false }}
     />
-    <Stack.Screen name={Routes.RAMP.ORDER_DETAILS} component={OrderDetails} />
+    <Stack.Screen name={Routes.RAMP.ORDER_DETAILS} getComponent={() => require('../../UI/Ramp/Views/OrderDetails').default} />
     <Stack.Screen
       name={Routes.RAMP.SEND_TRANSACTION}
-      component={SendTransaction}
+      getComponent={() => require('../../UI/Ramp/Views/SendTransaction').default}
     />
     <Stack.Screen
       name={Routes.BRIDGE.BRIDGE_TRANSACTION_DETAILS}
-      component={BridgeTransactionDetails}
+      getComponent={() => require('../../UI/Bridge/components/TransactionDetails/TransactionDetails').BridgeTransactionDetails}
     />
   </Stack.Navigator>
 );
@@ -228,27 +228,27 @@ const BrowserFlow = (props) => (
   >
     <Stack.Screen
       name={Routes.BROWSER.VIEW}
-      component={Browser}
+      getComponent={() => require('../../Views/Browser').default}
       options={{ headerShown: false }}
     />
     <Stack.Screen
       name={Routes.BROWSER.ASSET_LOADER}
-      component={AssetLoader}
+      getComponent={() => require('../../Views/AssetLoader').AssetLoader}
       options={{ headerShown: false, animationEnabled: false }}
     />
     <Stack.Screen
       name={Routes.BROWSER.ASSET_VIEW}
-      component={Asset}
+      getComponent={() => require('../../Views/Asset').default}
       initialParams={props.route.params}
     />
     <Stack.Screen
       name="SwapsAmountView"
-      component={SwapsAmountView}
+      getComponent={() => require('../../UI/Swaps').default}
       options={SwapsAmountView.navigationOptions}
     />
     <Stack.Screen
       name="SwapsQuotesView"
-      component={SwapsQuotesView}
+      getComponent={() => require('../../UI/Swaps/QuotesView').default}
       options={SwapsQuotesView.navigationOptions}
     />
   </Stack.Navigator>
@@ -261,12 +261,12 @@ const SnapsSettingsStack = () => (
   <Stack.Navigator>
     <Stack.Screen
       name={Routes.SNAPS.SNAPS_SETTINGS_LIST}
-      component={SnapsSettingsList}
+      getComponent={() => require('../../Views/Snaps/SnapsSettingsList').SnapsSettingsList}
       options={SnapsSettingsList.navigationOptions}
     />
     <Stack.Screen
       name={Routes.SNAPS.SNAP_SETTINGS}
-      component={SnapSettings}
+      getComponent={() => require('../../Views/Snaps/SnapSettings').SnapSettings}
       options={SnapSettings.navigationOptions}
     />
   </Stack.Navigator>
@@ -278,12 +278,12 @@ const NotificationsOptInStack = () => (
     <Stack.Screen
       mode={'modal'}
       name={Routes.NOTIFICATIONS.OPT_IN}
-      component={OptIn}
+      getComponent={() => require('../../Views/Notifications/OptIn').default}
       options={{ headerShown: false }}
     />
     <Stack.Screen
       name={Routes.SETTINGS.NOTIFICATIONS}
-      component={NotificationsSettings}
+      getComponent={() => require('../../Views/Settings/NotificationsSettings').default}
       options={NotificationsSettings.navigationOptions}
     />
   </Stack.Navigator>
@@ -293,30 +293,30 @@ const SettingsFlow = () => (
   <Stack.Navigator initialRouteName={'Settings'}>
     <Stack.Screen
       name="Settings"
-      component={Settings}
+      getComponent={() => require('../../Views/Settings').default}
       options={Settings.navigationOptions}
     />
     <Stack.Screen
       name="GeneralSettings"
-      component={GeneralSettings}
+      getComponent={() => require('../../Views/Settings/GeneralSettings').default}
       options={GeneralSettings.navigationOptions}
     />
     <Stack.Screen
       name="AdvancedSettings"
-      component={AdvancedSettings}
+      getComponent={() => require('../../Views/Settings/AdvancedSettings').default}
       options={AdvancedSettings.navigationOptions}
     />
-    <Stack.Screen name="SDKSessionsManager" component={SDKSessionsManager} />
-    <Stack.Screen name="PermissionsManager" component={PermissionsManager} />
+    <Stack.Screen name="SDKSessionsManager" getComponent={() => require('../../Views/SDK/SDKSessionsManager/SDKSessionsManager').default} />
+    <Stack.Screen name="PermissionsManager" getComponent={() => require('../../Views/Settings/PermissionsSettings/PermissionsManager').default} />
     <Stack.Screen
       name="SecuritySettings"
-      component={SecuritySettings}
+      getComponent={() => require('../../Views/Settings/SecuritySettings').default}
       options={SecuritySettings.navigationOptions}
     />
-    <Stack.Screen name={Routes.RAMP.SETTINGS} component={RampSettings} />
+    <Stack.Screen name={Routes.RAMP.SETTINGS} getComponent={() => require('../../UI/Ramp/Views/Settings').default} />
     <Stack.Screen
       name={Routes.RAMP.ACTIVATION_KEY_FORM}
-      component={RampActivationKeyForm}
+      getComponent={() => require('../../UI/Ramp/Views/Settings/ActivationKeyForm').default}
     />
     {
       /**
@@ -328,47 +328,47 @@ const SettingsFlow = () => (
       isTest && (
         <Stack.Screen
           name="AesCryptoTestForm"
-          component={AesCryptoTestForm}
+          getComponent={() => require('../../Views/AesCryptoTestForm').AesCryptoTestForm}
           options={AesCryptoTestForm.navigationOptions}
         />
       )
     }
     <Stack.Screen
       name="ExperimentalSettings"
-      component={ExperimentalSettings}
+      getComponent={() => require('../../Views/Settings/ExperimentalSettings').default}
       options={ExperimentalSettings.navigationOptions}
     />
     <Stack.Screen
       name="NetworksSettings"
-      component={NetworksSettings}
+      getComponent={() => require('../../Views/Settings/NetworksSettings').default}
       options={NetworksSettings.navigationOptions}
     />
     <Stack.Screen
       name="CompanySettings"
-      component={AppInformation}
+      getComponent={() => require('../../Views/Settings/AppInformation').default}
       options={AppInformation.navigationOptions}
     />
     {process.env.MM_ENABLE_SETTINGS_PAGE_DEV_OPTIONS === 'true' && (
       <Stack.Screen
         name={Routes.SETTINGS.DEVELOPER_OPTIONS}
-        component={DeveloperOptions}
+        getComponent={() => require('../../Views/Settings/DeveloperOptions').default}
         options={DeveloperOptions.navigationOptions}
       />
     )}
 
     <Stack.Screen
       name="ContactsSettings"
-      component={Contacts}
+      getComponent={() => require('../../Views/Settings/Contacts').default}
       options={Contacts.navigationOptions}
     />
     <Stack.Screen
       name="ContactForm"
-      component={ContactForm}
+      getComponent={() => require('../../Views/Settings/Contacts/ContactForm').default}
       options={ContactForm.navigationOptions}
     />
     <Stack.Screen
       name="AccountPermissionsAsFullScreen"
-      component={AccountPermissions}
+      getComponent={() => require('../../../components/Views/AccountPermissions').default}
       options={{ headerShown: false }}
       initialParams={{
         initialScreen: AccountPermissionsScreens.PermissionsSummary,
@@ -376,51 +376,51 @@ const SettingsFlow = () => (
     />
     <Stack.Screen
       name="RevealPrivateCredentialView"
-      component={RevealPrivateCredential}
+      getComponent={() => require('../../Views/RevealPrivateCredential').RevealPrivateCredential}
     />
     <Stack.Screen
       name={Routes.WALLET.WALLET_CONNECT_SESSIONS_VIEW}
-      component={WalletConnectSessions}
+      getComponent={() => require('../../Views/WalletConnectSessions').default}
       options={WalletConnectSessions.navigationOptions}
     />
     <Stack.Screen
       name="ResetPassword"
-      component={ResetPassword}
+      getComponent={() => require('../../Views/ResetPassword').default}
       options={ResetPassword.navigationOptions}
     />
     <Stack.Screen
       name="AccountBackupStep1B"
-      component={AccountBackupStep1B}
+      getComponent={() => require('../../Views/AccountBackupStep1B').default}
       options={AccountBackupStep1B.navigationOptions}
     />
     <Stack.Screen
       name="ManualBackupStep1"
-      component={ManualBackupStep1}
+      getComponent={() => require('../../Views/ManualBackupStep1').default}
       options={ManualBackupStep1.navigationOptions}
     />
     <Stack.Screen
       name="ManualBackupStep2"
-      component={ManualBackupStep2}
+      getComponent={() => require('../../Views/ManualBackupStep2').default}
       options={ManualBackupStep2.navigationOptions}
     />
     <Stack.Screen
       name="ManualBackupStep3"
-      component={ManualBackupStep3}
+      getComponent={() => require('../../Views/ManualBackupStep3').default}
       options={ManualBackupStep3.navigationOptions}
     />
     <Stack.Screen
       name="EnterPasswordSimple"
-      component={EnterPasswordSimple}
+      getComponent={() => require('../../Views/EnterPasswordSimple').default}
       options={EnterPasswordSimple.navigationOptions}
     />
     <Stack.Screen
       name={Routes.SETTINGS.NOTIFICATIONS}
-      component={NotificationsSettings}
+      getComponent={() => require('../../Views/Settings/NotificationsSettings').default}
       options={NotificationsSettings.navigationOptions}
     />
     <Stack.Screen
       name={Routes.SETTINGS.BACKUP_AND_SYNC}
-      component={BackupAndSyncSettings}
+      getComponent={() => NotificationsOptInStack}
       options={BackupAndSyncSettings.navigationOptions}
     />
     {
@@ -428,7 +428,7 @@ const SettingsFlow = () => (
     }
     <Stack.Screen
       name={Routes.SNAPS.SNAPS_SETTINGS_LIST}
-      component={SnapsSettingsStack}
+      getComponent={() => SnapsSettingsStack}
       options={{ headerShown: false }}
     />
     {
@@ -575,28 +575,27 @@ const HomeTabs = () => {
           <Tab.Screen
             name={Routes.WALLET.HOME}
             options={options.home}
-            component={WalletTabModalFlow}
+            getComponent={() => WalletTabModalFlow}
           />
           <Tab.Screen
             name={Routes.TRANSACTIONS_VIEW}
             options={options.activity}
-            component={TransactionsHome}
+            getComponent={() => require('../../Views/TransactionsView').default}
           />
           <Tab.Screen
             name={Routes.MODAL.WALLET_ACTIONS}
             options={options.actions}
-            component={WalletTabModalFlow}
+            getComponent={() => WalletTabModalFlow}
           />
           <Tab.Screen
             name={Routes.BROWSER.HOME}
             options={options.browser}
-            component={BrowserFlow}
+            getComponent={() => BrowserFlow}
           />
-
           <Tab.Screen
             name={Routes.SETTINGS_VIEW}
             options={options.settings}
-            component={SettingsFlow}
+            getComponent={() => SettingsFlow}
           />
         </Tab.Navigator>
       </Drawer>
@@ -608,7 +607,7 @@ const Webview = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="SimpleWebview"
-      component={SimpleWebview}
+      getComponent={() => require('../../Views/SimpleWebview').default}
       mode={'modal'}
       options={SimpleWebview.navigationOptions}
     />
@@ -619,7 +618,7 @@ const SendView = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="Send"
-      component={Send}
+      getComponent={() => require('../../Views/confirmations/legacy/Send').default}
       options={Send.navigationOptions}
     />
   </Stack.Navigator>
@@ -630,7 +629,7 @@ const NftDetailsModeView = (props) => (
   <Stack.Navigator>
     <Stack.Screen
       name=" " // No name here because this title will be displayed in the header of the page
-      component={NftDetails}
+      getComponent={() => require('../../Views/NftDetails').default}
       initialParams={{
         collectible: props.route.params?.collectible,
       }}
@@ -643,7 +642,7 @@ const NftDetailsFullImageModeView = (props) => (
   <Stack.Navigator>
     <Stack.Screen
       name=" " // No name here because this title will be displayed in the header of the page
-      component={NftDetailsFullImage}
+      getComponent={() => require('../../Views/NftDetails/NFtDetailsFullImage').default}
       initialParams={{
         collectible: props.route.params?.collectible,
       }}
@@ -655,22 +654,22 @@ const SendFlowView = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="SendTo"
-      component={SendTo}
+      getComponent={() => require('../../Views/confirmations/legacy/SendFlow/SendTo').default}
       options={SendTo.navigationOptions}
     />
     <Stack.Screen
       name="Amount"
-      component={Amount}
+      getComponent={() => require('../../Views/confirmations/legacy/SendFlow/Amount').default}
       options={Amount.navigationOptions}
     />
     <Stack.Screen
       name={Routes.SEND_FLOW.CONFIRM}
-      component={Confirm}
+      getComponent={() => require('../../Views/confirmations/legacy/SendFlow/Confirm').default}
       options={Confirm.navigationOptions}
     />
     <Stack.Screen
       name={Routes.STANDALONE_CONFIRMATIONS.TRANSFER}
-      component={RedesignedConfirm}
+      getComponent={() => require('../../Views/confirmations/components/confirm').Confirm}
     />
   </Stack.Navigator>
 );
@@ -679,7 +678,7 @@ const AddBookmarkView = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="AddBookmark"
-      component={AddBookmark}
+      getComponent={() => require('../../Views/AddBookmark').default}
       options={AddBookmark.navigationOptions}
     />
   </Stack.Navigator>
@@ -689,7 +688,7 @@ const OfflineModeView = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="OfflineMode"
-      component={OfflineMode}
+      getComponent={() => require('../../Views/OfflineMode').default}
       options={OfflineMode.navigationOptions}
     />
   </Stack.Navigator>
@@ -699,12 +698,12 @@ const PaymentRequestView = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="PaymentRequest"
-      component={PaymentRequest}
+      getComponent={() => require('../../UI/PaymentRequest').default}
       options={PaymentRequest.navigationOptions}
     />
     <Stack.Screen
       name="PaymentRequestSuccess"
-      component={PaymentRequestSuccess}
+      getComponent={() => require('../../UI/PaymentRequestSuccess').default}
       options={PaymentRequestSuccess.navigationOptions}
     />
   </Stack.Navigator>
@@ -715,28 +714,28 @@ const NotificationsModeView = (props) => (
   <Stack.Navigator>
     <Stack.Screen
       name={Routes.NOTIFICATIONS.VIEW}
-      component={NotificationsView}
+      getComponent={() => require('../../Views/Notifications').default}
       options={NotificationsView.navigationOptions}
     />
     <Stack.Screen
       name={Routes.SETTINGS.NOTIFICATIONS}
-      component={NotificationsSettings}
+      getComponent={() => require('../../Views/Settings/NotificationsSettings').default}
       options={NotificationsSettings.navigationOptions}
     />
     <Stack.Screen
       mode={'modal'}
       name={Routes.NOTIFICATIONS.OPT_IN}
-      component={OptIn}
+      getComponent={() => require('../../Views/Notifications/OptIn').default}
       options={OptIn.navigationOptions}
     />
     <Stack.Screen
       name={Routes.NOTIFICATIONS.DETAILS}
-      component={NotificationsDetails}
+      getComponent={() => require('../../Views/Notifications/Details').default}
       options={NotificationsDetails.navigationOptions}
     />
     <Stack.Screen
       name="ContactForm"
-      component={ContactForm}
+      getComponent={() => require('../../Views/Settings/Contacts/ContactForm').default}
       options={ContactForm.navigationOptions}
     />
   </Stack.Navigator>
@@ -746,12 +745,12 @@ const Swaps = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="SwapsAmountView"
-      component={SwapsAmountView}
+      getComponent={() => require('../../UI/Swaps').default}
       options={SwapsAmountView.navigationOptions}
     />
     <Stack.Screen
       name="SwapsQuotesView"
-      component={SwapsQuotesView}
+      getComponent={() => require('../../UI/Swaps/QuotesView').default}
       options={SwapsQuotesView.navigationOptions}
     />
   </Stack.Navigator>
@@ -761,37 +760,37 @@ const SetPasswordFlow = () => (
   <Stack.Navigator>
     <Stack.Screen
       name="ChoosePassword"
-      component={ChoosePassword}
+      getComponent={() => require('../../Views/ChoosePassword').default}
       options={ChoosePassword.navigationOptions}
     />
     <Stack.Screen
       name="AccountBackupStep1"
-      component={AccountBackupStep1}
+      getComponent={() => require('../../Views/AccountBackupStep1').default}
       options={AccountBackupStep1.navigationOptions}
     />
     <Stack.Screen
       name="AccountBackupStep1B"
-      component={AccountBackupStep1B}
+      getComponent={() => require('../../Views/AccountBackupStep1B').default}
       options={AccountBackupStep1B.navigationOptions}
     />
     <Stack.Screen
       name="ManualBackupStep1"
-      component={ManualBackupStep1}
+      getComponent={() => require('../../Views/ManualBackupStep1').default}
       options={ManualBackupStep1.navigationOptions}
     />
     <Stack.Screen
       name="ManualBackupStep2"
-      component={ManualBackupStep2}
+      getComponent={() => require('../../Views/ManualBackupStep2').default}
       options={ManualBackupStep2.navigationOptions}
     />
     <Stack.Screen
       name="ManualBackupStep3"
-      component={ManualBackupStep3}
+      getComponent={() => require('../../Views/ManualBackupStep3').default}
       options={ManualBackupStep3.navigationOptions}
     />
     <Stack.Screen
       name="OptinMetrics"
-      component={OptinMetrics}
+      getComponent={() => require('../../UI/OptinMetrics').default}
       options={OptinMetrics.navigationOptions}
     />
   </Stack.Navigator>
@@ -807,7 +806,7 @@ const MainNavigator = () => (
   >
     <Stack.Screen
       name="CollectiblesDetails"
-      component={CollectiblesDetails}
+      getComponent={() => require('../../UI/CollectibleModal').default}
       options={{
         //Refer to - https://reactnavigation.org/docs/stack-navigator/#animations
         cardStyle: { backgroundColor: importedColors.transparent },
@@ -820,7 +819,7 @@ const MainNavigator = () => (
     />
     <Stack.Screen
       name={Routes.DEPRECATED_NETWORK_DETAILS}
-      component={DeprecatedNetworkDetails}
+      getComponent={() => require('../../UI/DeprecatedNetworkModal').default}
       options={{
         //Refer to - https://reactnavigation.org/docs/stack-navigator/#animations
         cardStyle: { backgroundColor: importedColors.transparent },
@@ -831,51 +830,51 @@ const MainNavigator = () => (
         }),
       }}
     />
-    <Stack.Screen name="Home" component={HomeTabs} />
-    <Stack.Screen name="Asset" component={AssetModalFlow} />
-    <Stack.Screen name="Webview" component={Webview} />
-    <Stack.Screen name="SendView" component={SendView} />
+    <Stack.Screen name="Home" getComponent={() => HomeTabs} />
+    <Stack.Screen name="Asset" getComponent={() => AssetModalFlow} />
+    <Stack.Screen name="Webview" getComponent={() => Webview} />
+    <Stack.Screen name="SendView" getComponent={() => SendView} />
     <Stack.Screen
       name="SendFlowView"
-      component={SendFlowView}
+      getComponent={() => SendFlowView}
       //Disabling swipe down on IOS
       options={{ gestureEnabled: false }}
     />
-    <Stack.Screen name="AddBookmarkView" component={AddBookmarkView} />
-    <Stack.Screen name="OfflineModeView" component={OfflineModeView} />
+    <Stack.Screen name="AddBookmarkView" getComponent={() => AddBookmarkView} />
+    <Stack.Screen name="OfflineModeView" getComponent={() => OfflineModeView} />
     <Stack.Screen
       name={Routes.NOTIFICATIONS.VIEW}
-      component={NotificationsModeView}
+      getComponent={() => NotificationsModeView}
     />
-    <Stack.Screen name={Routes.QR_TAB_SWITCHER} component={QRTabSwitcher} />
-    <Stack.Screen name="NftDetails" component={NftDetailsModeView} />
+    <Stack.Screen name={Routes.QR_TAB_SWITCHER} getComponent={() => require('../../Views/QRTabSwitcher').default} />
+    <Stack.Screen name="NftDetails" getComponent={() => NftDetailsModeView} />
     <Stack.Screen
       name="NftDetailsFullImage"
-      component={NftDetailsFullImageModeView}
+      getComponent={() => NftDetailsFullImageModeView}
     />
-    <Stack.Screen name="PaymentRequestView" component={PaymentRequestView} />
+    <Stack.Screen name="PaymentRequestView" getComponent={() => PaymentRequestView} />
     <Stack.Screen name={Routes.RAMP.BUY}>
       {() => <RampRoutes rampType={RampType.BUY} />}
     </Stack.Screen>
     <Stack.Screen name={Routes.RAMP.SELL}>
       {() => <RampRoutes rampType={RampType.SELL} />}
     </Stack.Screen>
-    <Stack.Screen name="Swaps" component={Swaps} />
-    <Stack.Screen name={Routes.BRIDGE.ROOT} component={BridgeScreenStack} />
+    <Stack.Screen name="Swaps" getComponent={() => Swaps} />
+    <Stack.Screen name={Routes.BRIDGE.ROOT} getComponent={() => require('../../UI/Bridge/routes').BridgeScreenStack} />
     <Stack.Screen
       name={Routes.BRIDGE.MODALS.ROOT}
-      component={BridgeModalStack}
+      getComponent={() => require('../../UI/Bridge/routes').BridgeModalStack}
       options={clearStackNavigatorOptions}
     />
-    <Stack.Screen name="StakeScreens" component={StakeScreenStack} />
+    <Stack.Screen name="StakeScreens" getComponent={() => require('../../UI/Stake/routes').StakeScreenStack} />
     <Stack.Screen
       name="StakeModals"
-      component={StakeModalStack}
+      getComponent={() => require('../../UI/Stake/routes').StakeModalStack}
       options={clearStackNavigatorOptions}
     />
     <Stack.Screen
       name="SetPasswordFlow"
-      component={SetPasswordFlow}
+      getComponent={() => SetPasswordFlow}
       headerTitle={() => (
         <Image
           style={styles.headerLogo}
@@ -889,7 +888,7 @@ const MainNavigator = () => (
     {/* TODO: This is added to support slide 4 in the carousel - once changed this can be safely removed*/}
     <Stack.Screen
       name="GeneralSettings"
-      component={GeneralSettings}
+      getComponent={() => require('../../Views/Settings/GeneralSettings').default}
       options={{
         headerShown: true,
         ...GeneralSettings.navigationOptions,
@@ -897,12 +896,12 @@ const MainNavigator = () => (
     />
     <Stack.Screen
       name={Routes.NOTIFICATIONS.OPT_IN_STACK}
-      component={NotificationsOptInStack}
+      getComponent={() => NotificationsOptInStack}
       options={NotificationsOptInStack.navigationOptions}
     />
     <Stack.Screen
       name={Routes.IDENTITY.TURN_ON_BACKUP_AND_SYNC}
-      component={TurnOnBackupAndSync}
+      getComponent={() => require('../../Views/Identity/TurnOnBackupAndSync/TurnOnBackupAndSync').default}
       options={TurnOnBackupAndSync.navigationOptions}
     />
   </Stack.Navigator>

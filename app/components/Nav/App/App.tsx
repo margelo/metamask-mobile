@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 import React, {
   useCallback,
   useContext,
@@ -180,23 +182,23 @@ const OnboardingSuccessFlow = () => (
   <Stack.Navigator initialRouteName={Routes.ONBOARDING.SUCCESS}>
     <Stack.Screen
       name={Routes.ONBOARDING.SUCCESS}
-      component={OnboardingSuccessComponent} // Used in SRP flow
+      getComponent={() => OnboardingSuccessComponent} // Used in SRP flow
     />
     <Stack.Screen
       name={Routes.ONBOARDING.DEFAULT_SETTINGS} // This is being used in import wallet flow
-      component={DefaultSettings}
+      getComponent={() => require('../../Views/OnboardingSuccess/DefaultSettings').default}
     />
     <Stack.Screen
       name={Routes.ONBOARDING.GENERAL_SETTINGS}
-      component={OnboardingGeneralSettings}
+      getComponent={() => require('../../Views/OnboardingSuccess/OnboardingGeneralSettings').default}
     />
     <Stack.Screen
       name={Routes.ONBOARDING.ASSETS_SETTINGS}
-      component={OnboardingAssetsSettings}
+      getComponent={() => require('../../Views/OnboardingSuccess/OnboardingAssetsSettings').default}
     />
     <Stack.Screen
       name={Routes.ONBOARDING.SECURITY_SETTINGS}
-      component={OnboardingSecuritySettings}
+      getComponent={() => require('../../Views/OnboardingSuccess/OnboardingSecuritySettings').default}
     />
   </Stack.Navigator>
 );
@@ -206,32 +208,32 @@ const OnboardingSuccessFlow = () => (
  */
 const OnboardingNav = () => (
   <Stack.Navigator initialRouteName="OnboardingCarousel">
-    <Stack.Screen name="Onboarding" component={Onboarding} />
-    <Stack.Screen name="OnboardingCarousel" component={OnboardingCarousel} />
-    <Stack.Screen name="ChoosePassword" component={ChoosePassword} />
-    <Stack.Screen name="AccountBackupStep1" component={AccountBackupStep1} />
-    <Stack.Screen name="AccountBackupStep1B" component={AccountBackupStep1B} />
+    <Stack.Screen name="Onboarding" getComponent={() => require('../../Views/Onboarding').default} />
+    <Stack.Screen name="OnboardingCarousel" getComponent={() => require('../../Views/OnboardingCarousel').default} />
+    <Stack.Screen name="ChoosePassword" getComponent={() => require('../../Views/ChoosePassword').default} />
+    <Stack.Screen name="AccountBackupStep1" getComponent={() => require('../../Views/AccountBackupStep1').default} />
+    <Stack.Screen name="AccountBackupStep1B" getComponent={() => require('../../Views/AccountBackupStep1B').default} />
     <Stack.Screen
       name={Routes.ONBOARDING.SUCCESS_FLOW}
-      component={OnboardingSuccessFlow}
+      getComponent={() => OnboardingSuccessFlow}
       options={{ headerShown: false }}
     />
     <Stack.Screen
       name={Routes.ONBOARDING.SUCCESS}
-      component={OnboardingSuccessComponentNoSRP} // Used in SRP flow
+      getComponent={() => OnboardingSuccessComponentNoSRP} // Used in SRP flow
     />
     <Stack.Screen
       name={Routes.ONBOARDING.DEFAULT_SETTINGS} // This is being used in import wallet flow
-      component={DefaultSettings}
+      getComponent={() => require('../../Views/OnboardingSuccess/DefaultSettings').default}
     />
-    <Stack.Screen name="ManualBackupStep1" component={ManualBackupStep1} />
-    <Stack.Screen name="ManualBackupStep2" component={ManualBackupStep2} />
-    <Stack.Screen name="ManualBackupStep3" component={ManualBackupStep3} />
+    <Stack.Screen name="ManualBackupStep1" getComponent={() => require('../../Views/ManualBackupStep1').default} />
+    <Stack.Screen name="ManualBackupStep2" getComponent={() => require('../../Views/ManualBackupStep2').default} />
+    <Stack.Screen name="ManualBackupStep3" getComponent={() => require('../../Views/ManualBackupStep3').default} />
     <Stack.Screen
       name={Routes.ONBOARDING.IMPORT_FROM_SECRET_RECOVERY_PHRASE}
-      component={ImportFromSecretRecoveryPhrase}
+      getComponent={() => require('../../Views/ImportFromSecretRecoveryPhrase').default}
     />
-    <Stack.Screen name="OptinMetrics" component={OptinMetrics} />
+    <Stack.Screen name="OptinMetrics" getComponent={() => require('../../UI/OptinMetrics').default} />
   </Stack.Navigator>
 );
 
@@ -241,7 +243,7 @@ const OnboardingNav = () => (
  */
 const SimpleWebviewScreen = () => (
   <Stack.Navigator mode={'modal'}>
-    <Stack.Screen name={Routes.WEBVIEW.SIMPLE} component={SimpleWebview} />
+    <Stack.Screen name={Routes.WEBVIEW.SIMPLE} getComponent={() => require('../../Views/SimpleWebview').default} />
   </Stack.Navigator>
 );
 
@@ -251,9 +253,9 @@ const OnboardingRootNav = () => (
     mode="modal"
     screenOptions={{ headerShown: false }}
   >
-    <Stack.Screen name="OnboardingNav" component={OnboardingNav} />
-    <Stack.Screen name={Routes.QR_TAB_SWITCHER} component={QRTabSwitcher} />
-    <Stack.Screen name={Routes.WEBVIEW.MAIN} component={SimpleWebviewScreen} />
+    <Stack.Screen name="OnboardingNav" getComponent={() => OnboardingNav} />
+    <Stack.Screen name={Routes.QR_TAB_SWITCHER} getComponent={() => require('../../Views/QRTabSwitcher').default} />
+    <Stack.Screen name={Routes.WEBVIEW.MAIN} getComponent={() => SimpleWebviewScreen} />
   </Stack.Navigator>
 );
 
@@ -264,15 +266,15 @@ const VaultRecoveryFlow = () => (
   >
     <Stack.Screen
       name={Routes.VAULT_RECOVERY.RESTORE_WALLET}
-      component={RestoreWallet}
+      getComponent={() => require('../../Views/RestoreWallet').RestoreWallet}
     />
     <Stack.Screen
       name={Routes.VAULT_RECOVERY.WALLET_RESTORED}
-      component={WalletRestored}
+      getComponent={() => require('../../Views/RestoreWallet/WalletRestored').default}
     />
     <Stack.Screen
       name={Routes.VAULT_RECOVERY.WALLET_RESET_NEEDED}
-      component={WalletResetNeeded}
+      getComponent={() => require('../../Views/RestoreWallet/WalletResetNeeded').default}
     />
   </Stack.Navigator>
 );
@@ -284,7 +286,7 @@ const AddNetworkFlow = () => {
     <Stack.Navigator>
       <Stack.Screen
         name="AddNetwork"
-        component={NetworkSettings}
+        getComponent={() => require('../../Views/Settings/NetworksSettings/NetworkSettings').default}
         initialParams={route?.params}
       />
     </Stack.Navigator>
@@ -297,10 +299,10 @@ const DetectedTokensFlow = () => (
     screenOptions={clearStackNavigatorOptions}
     initialRouteName={'DetectedTokens'}
   >
-    <Stack.Screen name={'DetectedTokens'} component={DetectedTokens} />
+    <Stack.Screen name={'DetectedTokens'} getComponent={() => require('../../Views/DetectedTokens').default} />
     <Stack.Screen
       name={'DetectedTokensConfirmation'}
-      component={DetectedTokensConfirmation}
+      getComponent={() => require('../../Views/DetectedTokensConfirmation').default}
     />
   </Stack.Navigator>
 );
@@ -320,169 +322,173 @@ const RootModalFlow = (
   <Stack.Navigator mode={'modal'} screenOptions={clearStackNavigatorOptions}>
     <Stack.Screen
       name={Routes.MODAL.WALLET_ACTIONS}
-      component={WalletActions}
+      getComponent={() => require('../../Views/WalletActions').default}
     />
     <Stack.Screen
       name={Routes.MODAL.DELETE_WALLET}
-      component={DeleteWalletModal}
+      getComponent={() => require('../../../components/UI/DeleteWalletModal').default}
     />
     <Stack.Screen
       name={Routes.MODAL.MODAL_CONFIRMATION}
-      component={ModalConfirmation}
+      getComponent={() => require('../../../component-library/components/Modals/ModalConfirmation').default}
     />
     <Stack.Screen
       name={Routes.MODAL.MODAL_MANDATORY}
-      component={ModalMandatory}
+      getComponent={() => require('../../../component-library/components/Modals/ModalMandatory').default}
     />
     <Stack.Screen
       name={Routes.SHEET.ACCOUNT_SELECTOR}
-      component={AccountSelector}
+      getComponent={() => require('../../../components/Views/AccountSelector').default}
     />
-    <Stack.Screen name={Routes.SHEET.ADD_ACCOUNT} component={AddNewAccount} />
-    <Stack.Screen name={Routes.SHEET.SDK_LOADING} component={SDKLoadingModal} />
+    <Stack.Screen name={Routes.SHEET.ADD_ACCOUNT} getComponent={() => require('../../Views/AddNewAccount').default} />
+    <Stack.Screen name={Routes.SHEET.SDK_LOADING} getComponent={() => require('../../Views/SDK/SDKLoadingModal/SDKLoadingModal').default} />
     <Stack.Screen
       name={Routes.SHEET.SDK_FEEDBACK}
-      component={SDKFeedbackModal}
+      getComponent={() => require('../../Views/SDK/SDKFeedbackModal/SDKFeedbackModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.SDK_MANAGE_CONNECTIONS}
-      component={SDKSessionModal}
+      getComponent={() => require('../../Views/SDK/SDKSessionModal/SDKSessionModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.EXPERIENCE_ENHANCER}
-      component={ExperienceEnhancerModal}
+      getComponent={() => require('../../../../app/components/Views/ExperienceEnhancerModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.DATA_COLLECTION}
-      component={DataCollectionModal}
+      getComponent={() => require('../../Views/DataCollectionModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.SDK_DISCONNECT}
-      component={SDKDisconnectModal}
+      getComponent={() => require('../../Views/SDK/SDKDisconnectModal/SDKDisconnectModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.ACCOUNT_CONNECT}
-      component={AccountConnect}
+      getComponent={() => require('../../../components/Views/AccountConnect').default}
     />
     <Stack.Screen
       name={Routes.SHEET.ACCOUNT_PERMISSIONS}
-      component={AccountPermissions}
+      getComponent={() => require('../../../components/Views/AccountPermissions').default}
       initialParams={{ initialScreen: AccountPermissionsScreens.Connected }}
     />
     <Stack.Screen
       name={Routes.SHEET.REVOKE_ALL_ACCOUNT_PERMISSIONS}
-      component={AccountPermissionsConfirmRevokeAll}
+      getComponent={() => require('../../../components/Views/AccountPermissions/AccountPermissionsConfirmRevokeAll').default}
     />
     <Stack.Screen
       name={Routes.SHEET.CONNECTION_DETAILS}
-      component={ConnectionDetails}
+      getComponent={() => require('../../../components/Views/AccountPermissions/ConnectionDetails').default}
     />
     <Stack.Screen
       name={Routes.SHEET.PERMITTED_NETWORKS_INFO_SHEET}
-      component={PermittedNetworksInfoSheet}
+      getComponent={() => require('../../Views/AccountPermissions/PermittedNetworksInfoSheet/PermittedNetworksInfoSheet').default}
     />
     <Stack.Screen
       name={Routes.SHEET.NETWORK_SELECTOR}
-      component={NetworkSelector}
+      getComponent={() => require('../../../components/Views/NetworkSelector').default}
     />
     <Stack.Screen
       name={Routes.SHEET.TOKEN_SORT}
-      component={TokenSortBottomSheet}
+      getComponent={() => require('../../../components/UI/Tokens/TokensBottomSheet/TokenSortBottomSheet').TokenSortBottomSheet}
     />
     <Stack.Screen
       name={Routes.SHEET.TOKEN_FILTER}
-      component={TokenFilterBottomSheet}
+      getComponent={() => require('../../../components/UI/Tokens/TokensBottomSheet/TokenFilterBottomSheet').TokenFilterBottomSheet}
     />
     <Stack.Screen
       name={Routes.SHEET.BASIC_FUNCTIONALITY}
-      component={BasicFunctionalityModal}
+      getComponent={() => require('../../UI/BasicFunctionality/BasicFunctionalityModal/BasicFunctionalityModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.CONFIRM_TURN_ON_BACKUP_AND_SYNC}
-      component={ConfirmTurnOnBackupAndSyncModal}
+      getComponent={() => require('../../UI/Identity/ConfirmTurnOnBackupAndSyncModal/ConfirmTurnOnBackupAndSyncModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.RESET_NOTIFICATIONS}
-      component={ResetNotificationsModal}
+      getComponent={() => require('../../UI/Notification/ResetNotificationsModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.RETURN_TO_DAPP_MODAL}
-      component={ReturnToAppModal}
+      getComponent={() => require('../../Views/ReturnToAppModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.AMBIGUOUS_ADDRESS}
-      component={AmbiguousAddressSheet}
+      getComponent={() => require('../../../../app/components/Views/Settings/Contacts/AmbiguousAddressSheet/AmbiguousAddressSheet').default}
     />
     <Stack.Screen
       name={Routes.MODAL.TURN_OFF_REMEMBER_ME}
-      component={TurnOffRememberMeModal}
+      getComponent={() => require('../../../components/UI/TurnOffRememberMeModal').TurnOffRememberMeModal}
     />
     <Stack.Screen
       name={'AssetHideConfirmation'}
-      component={AssetHideConfirmation}
+      getComponent={() => require('../../Views/AssetHideConfirmation').default}
     />
-    <Stack.Screen name={'DetectedTokens'} component={DetectedTokensFlow} />
-    <Stack.Screen name={'AssetOptions'} component={AssetOptions} />
-    <Stack.Screen name={'NftOptions'} component={NftOptions} />
-    <Stack.Screen name={Routes.MODAL.UPDATE_NEEDED} component={UpdateNeeded} />
+    <Stack.Screen name={'DetectedTokens'} getComponent={() => DetectedTokensFlow} />
+    <Stack.Screen name={'AssetOptions'} getComponent={() => require('../../Views/AssetOptions').default} />
+    <Stack.Screen name={'NftOptions'} getComponent={() => require('../../../components/Views/NftOptions').default} />
+    <Stack.Screen name={Routes.MODAL.UPDATE_NEEDED} getComponent={() => require('../../../components/UI/UpdateNeeded').UpdateNeeded} />
     <Stack.Screen
       name={Routes.MODAL.ENABLE_AUTOMATIC_SECURITY_CHECKS}
-      component={EnableAutomaticSecurityChecksModal}
+      getComponent={() => require('../../../components/UI/EnableAutomaticSecurityChecksModal').EnableAutomaticSecurityChecksModal}
     />
     {
       ///: BEGIN:ONLY_INCLUDE_IF(multi-srp)
-      <Stack.Screen
-        name={Routes.SHEET.SELECT_SRP}
-        component={SelectSRPBottomSheet}
-      />
+    }
+    <Stack.Screen
+      name={Routes.SHEET.SELECT_SRP}
+      getComponent={() => require('../../Views/SelectSRP/SelectSRPBottomSheet').SelectSRPBottomSheet}
+      initialParams={{ ...props.route.params }}
+    />
+    {
       ///: END:ONLY_INCLUDE_IF
     }
     <Stack.Screen
       name={Routes.MODAL.SRP_REVEAL_QUIZ}
-      component={SRPQuiz}
+      getComponent={() => require('../../Views/Quiz').SRPQuiz}
       ///: BEGIN:ONLY_INCLUDE_IF(multi-srp)
       initialParams={{ ...props.route.params }}
       ///: END:ONLY_INCLUDE_IF
+      options={{ gestureEnabled: false }}
     />
     <Stack.Screen
       name={Routes.SHEET.ACCOUNT_ACTIONS}
-      component={AccountActions}
+      getComponent={() => require('../../../components/Views/AccountActions').default}
     />
     <Stack.Screen
       name={Routes.SHEET.FIAT_ON_TESTNETS_FRICTION}
-      component={FiatOnTestnetsFriction}
+      getComponent={() => require('../../../components/Views/Settings/AdvancedSettings/FiatOnTestnetsFriction').default}
     />
     <Stack.Screen
       name={Routes.SHEET.SHOW_IPFS}
-      component={ShowIpfsGatewaySheet}
+      getComponent={() => require('../../Views/ShowIpfsGatewaySheet/ShowIpfsGatewaySheet').default}
     />
     <Stack.Screen
       name={Routes.SHEET.SHOW_NFT_DISPLAY_MEDIA}
-      component={ShowDisplayNftMediaSheet}
+      getComponent={() => require('../../Views/ShowDisplayMediaNFTSheet/ShowDisplayNFTMediaSheet').default}
     />
     <Stack.Screen
       name={Routes.MODAL.NFT_AUTO_DETECTION_MODAL}
-      component={NFTAutoDetectionModal}
+      getComponent={() => require('../../../../app/components/Views/NFTAutoDetectionModal/NFTAutoDetectionModal').default}
     />
     {isNetworkUiRedesignEnabled() ? (
       <Stack.Screen
         name={Routes.MODAL.MULTI_RPC_MIGRATION_MODAL}
-        component={MultiRpcModal}
+        getComponent={() => require('../../../components/Views/MultiRpcModal/MultiRpcModal').default}
       />
     ) : null}
     <Stack.Screen
       name={Routes.SHEET.SHOW_TOKEN_ID}
-      component={ShowTokenIdSheet}
+      getComponent={() => require('../../../components/Views/ShowTokenIdSheet').default}
     />
     <Stack.Screen
       name={Routes.SHEET.ORIGIN_SPAM_MODAL}
-      component={OriginSpamModal}
+      getComponent={() => require('../../Views/OriginSpamModal/OriginSpamModal').default}
     />
     <Stack.Screen
       name={Routes.SHEET.CHANGE_IN_SIMULATION_MODAL}
-      component={ChangeInSimulationModal}
+      getComponent={() => require('../../Views/ChangeInSimulationModal/ChangeInSimulationModal').default}
     />
-    <Stack.Screen name={Routes.SHEET.TOOLTIP_MODAL} component={TooltipModal} />
+    <Stack.Screen name={Routes.SHEET.TOOLTIP_MODAL} getComponent={() => require('../../../components/Views/TooltipModal').default} />
   </Stack.Navigator>
 );
 
@@ -492,12 +498,12 @@ const ImportPrivateKeyView = () => (
       headerShown: false,
     }}
   >
-    <Stack.Screen name="ImportPrivateKey" component={ImportPrivateKey} />
+    <Stack.Screen name="ImportPrivateKey" getComponent={() => require('../../Views/ImportPrivateKey').default} />
     <Stack.Screen
       name="ImportPrivateKeySuccess"
-      component={ImportPrivateKeySuccess}
+      getComponent={() => require('../../Views/ImportPrivateKeySuccess').default}
     />
-    <Stack.Screen name={Routes.QR_TAB_SWITCHER} component={QRTabSwitcher} />
+    <Stack.Screen name={Routes.QR_TAB_SWITCHER} getComponent={() => require('../../Views/QRTabSwitcher').default} />
   </Stack.Navigator>
 );
 
@@ -510,7 +516,7 @@ const ImportSRPView = () => (
   >
     <Stack.Screen
       name={Routes.MULTI_SRP.IMPORT}
-      component={ImportNewSecretRecoveryPhrase}
+      getComponent={() => require('../../Views/ImportNewSecretRecoveryPhrase').default}
     />
   </Stack.Navigator>
 );
@@ -522,7 +528,7 @@ const ConnectQRHardwareFlow = () => (
       headerShown: false,
     }}
   >
-    <Stack.Screen name="ConnectQRHardware" component={ConnectQRHardware} />
+    <Stack.Screen name="ConnectQRHardware" getComponent={() => require('../../Views/ConnectQRHardware').default} />
   </Stack.Navigator>
 );
 
@@ -535,7 +541,7 @@ const LedgerConnectFlow = () => (
   >
     <Stack.Screen
       name={Routes.HW.LEDGER_CONNECT}
-      component={LedgerSelectAccount}
+      getComponent={() => require('../../Views/LedgerSelectAccount').default}
     />
   </Stack.Navigator>
 );
@@ -544,14 +550,14 @@ const ConnectHardwareWalletFlow = () => (
   <Stack.Navigator>
     <Stack.Screen
       name={Routes.HW.SELECT_DEVICE}
-      component={SelectHardwareWallet}
+      getComponent={() => require('../../Views/ConnectHardware/SelectHardware').default}
     />
   </Stack.Navigator>
 );
 
 const FlatConfirmationRequest = () => (
   <Stack.Navigator>
-    <Stack.Screen name={Routes.CONFIRMATION_REQUEST_FLAT} component={Confirm} />
+    <Stack.Screen name={Routes.CONFIRMATION_REQUEST_FLAT} getComponent={() => require('../../Views/confirmations/components/confirm').Confirm} />
   </Stack.Navigator>
 );
 
@@ -565,7 +571,7 @@ const ModalConfirmationRequest = () => (
   >
     <Stack.Screen
       name={Routes.CONFIRMATION_REQUEST_MODAL}
-      component={Confirm}
+      getComponent={() => require('../../Views/confirmations/components/confirm').Confirm}
     />
   </Stack.Navigator>
 );
@@ -580,7 +586,7 @@ const ModalSwitchAccountType = () => (
   >
     <Stack.Screen
       name={Routes.CONFIRMATION_SWITCH_ACCOUNT_TYPE}
-      component={SwitchAccountTypeModal}
+      getComponent={() => require('../../Views/confirmations/components/modals/switch-account-type-modal').default}
     />
   </Stack.Navigator>
 );
@@ -603,64 +609,65 @@ const AppFlow = () => {
         // Note: This is probably not needed but nice to ensure that wallet isn't accessible when it is locked
         <Stack.Screen
           name={Routes.ONBOARDING.HOME_NAV}
-          component={Main}
+          getComponent={() => Main}
           options={{ headerShown: false }}
         />
       )}
-      <Stack.Screen name={Routes.FOX_LOADER} component={FoxLoader} />
+      <Stack.Screen name={Routes.FOX_LOADER} getComponent={() => require('../../../components/UI/FoxLoader').default} />
+
       <Stack.Screen
         name={Routes.ONBOARDING.LOGIN}
-        component={Login}
+        getComponent={() => require('../../Views/Login').default}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name={Routes.MODAL.MAX_BROWSER_TABS_MODAL}
-        component={MaxBrowserTabsModal}
+        getComponent={() => require('../../Views/Browser/MaxBrowserTabsModal').default}
       />
       <Stack.Screen
         name="OnboardingRootNav"
-        component={OnboardingRootNav}
+        getComponent={() => OnboardingRootNav}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name={Routes.ONBOARDING.SUCCESS_FLOW}
-        component={OnboardingSuccessFlow}
+        getComponent={() => OnboardingSuccessFlow}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name={Routes.VAULT_RECOVERY.RESTORE_WALLET}
-        component={VaultRecoveryFlow}
+        getComponent={() => VaultRecoveryFlow}
       />
       <Stack.Screen
         name={Routes.MODAL.ROOT_MODAL_FLOW}
-        component={RootModalFlow}
+        getComponent={() => RootModalFlow}
       />
       <Stack.Screen
         name="ImportPrivateKeyView"
-        component={ImportPrivateKeyView}
+        getComponent={() => ImportPrivateKeyView}
         options={{ animationEnabled: true }}
       />
       {
         ///: BEGIN:ONLY_INCLUDE_IF(multi-srp)
         <Stack.Screen
           name="ImportSRPView"
-          component={ImportSRPView}
+          getComponent={() => ImportSRPView}
           options={{ animationEnabled: true }}
         />
         ///: END:ONLY_INCLUDE_IF
       }
       <Stack.Screen
         name="ConnectQRHardwareFlow"
-        component={ConnectQRHardwareFlow}
+        getComponent={() => ConnectQRHardwareFlow}
         options={{ animationEnabled: true }}
       />
       <Stack.Screen
         name={Routes.HW.CONNECT_LEDGER}
-        component={LedgerConnectFlow}
+        getComponent={() => LedgerConnectFlow}
       />
       <Stack.Screen
         name={Routes.HW.CONNECT}
-        component={ConnectHardwareWalletFlow}
+        getComponent={() => ConnectHardwareWalletFlow}
       />
       <Stack.Screen
         options={{
@@ -673,7 +680,7 @@ const AppFlow = () => {
           }),
         }}
         name={Routes.LEDGER_TRANSACTION_MODAL}
-        component={LedgerTransactionModal}
+        getComponent={() => require('../../UI/LedgerModals/LedgerTransactionModal').default}
       />
       <Stack.Screen
         options={{
@@ -686,42 +693,42 @@ const AppFlow = () => {
           }),
         }}
         name={Routes.LEDGER_MESSAGE_SIGN_MODAL}
-        component={LedgerMessageSignModal}
+        getComponent={() => require('../../UI/LedgerModals/LedgerMessageSignModal').default}
       />
-      <Stack.Screen name={Routes.OPTIONS_SHEET} component={OptionsSheet} />
+      <Stack.Screen name={Routes.OPTIONS_SHEET} getComponent={() => require('../../UI/SelectOptionSheet/OptionsSheet').default} />
       <Stack.Screen
         name={Routes.EDIT_ACCOUNT_NAME}
-        component={EditAccountName}
+        getComponent={() => require('../../Views/EditAccountName/EditAccountName').default}
         options={{ animationEnabled: true }}
       />
       <Stack.Screen
         name={Routes.ADD_NETWORK}
-        component={AddNetworkFlow}
+        getComponent={() => AddNetworkFlow}
         options={{ animationEnabled: true }}
       />
       {isNetworkUiRedesignEnabled() ? (
         <Stack.Screen
           name={Routes.EDIT_NETWORK}
-          component={AddNetworkFlow}
+          getComponent={() => AddNetworkFlow}
           options={{ animationEnabled: true }}
         />
       ) : null}
       <Stack.Screen
         name={Routes.LOCK_SCREEN}
-        component={LockScreen}
+        getComponent={() => require('../../Views/LockScreen').default}
         options={{ gestureEnabled: false }}
       />
       <Stack.Screen
         name={Routes.CONFIRMATION_REQUEST_FLAT}
-        component={FlatConfirmationRequest}
+        getComponent={() => FlatConfirmationRequest}
       />
       <Stack.Screen
         name={Routes.CONFIRMATION_REQUEST_MODAL}
-        component={ModalConfirmationRequest}
+        getComponent={() => ModalConfirmationRequest}
       />
       <Stack.Screen
         name={Routes.CONFIRMATION_SWITCH_ACCOUNT_TYPE}
-        component={ModalSwitchAccountType}
+        getComponent={() => ModalSwitchAccountType}
       />
     </Stack.Navigator>
   );
@@ -760,15 +767,15 @@ const App: React.FC = () => {
       try {
         if (existingUser) {
           // This should only be called if the auth type is not password, which is not the case so consider removing it
-          await trace(
-            {
-              name: TraceName.AppStartBiometricAuthentication,
-              op: TraceOperation.BiometricAuthentication,
-            },
-            async () => {
-              await Authentication.appTriggeredAuth();
-            },
-          );
+          // await trace(
+          //   {
+          //     name: TraceName.AppStartBiometricAuthentication,
+          //     op: TraceOperation.BiometricAuthentication,
+          //   },
+          //   async () => {
+          //     await Authentication.appTriggeredAuth();
+          //   },
+          // );
           // we need to reset the navigator here so that the user cannot go back to the login screen
           navigation.reset({ routes: [{ name: Routes.ONBOARDING.HOME_NAV }] });
         } else {
@@ -1002,3 +1009,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
