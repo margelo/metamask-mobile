@@ -3,15 +3,15 @@ import {
   Text,
   TextColor,
   TextVariant,
+  ButtonIcon,
+  ButtonIconSize,
+  IconName,
+  IconColor,
 } from '@metamask/design-system-react-native';
-import { useTailwind } from '@metamask/design-system-twrnc-preset';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { TouchableOpacity } from 'react-native';
-import {
-  PredictMarket as PredictMarketType,
-  PredictOutcomeToken,
-} from '../../types';
+import { PredictMarket as PredictMarketType } from '../../types';
 import {
   PredictNavigationParamList,
   PredictEntryPoint,
@@ -19,22 +19,26 @@ import {
 import { PredictEventValues } from '../../constants/eventNames';
 import Routes from '../../../../../constants/navigation/Routes';
 import TrendingFeedSessionManager from '../../../Trending/services/TrendingFeedSessionManager';
-import PredictSportTeamGradient from '../PredictSportTeamGradient/PredictSportTeamGradient';
 import PredictSportScoreboard from '../PredictSportScoreboard/PredictSportScoreboard';
-import { PredictActionButtons } from '../PredictActionButtons';
-import { usePredictActionGuard } from '../../hooks/usePredictActionGuard';
+import { PredictSportCardFooter } from '../PredictSportCardFooter';
+import { useTailwind } from '@metamask/design-system-twrnc-preset';
 
 interface PredictMarketSportCardProps {
   market: PredictMarketType;
   testID?: string;
   entryPoint?: PredictEntryPoint;
+  onDismiss?: () => void;
+  isCarousel?: boolean;
 }
 
 const PredictMarketSportCard: React.FC<PredictMarketSportCardProps> = ({
   market,
   testID,
   entryPoint = PredictEventValues.ENTRY_POINT.PREDICT_FEED,
+  onDismiss,
+  isCarousel,
 }) => {
+  const tw = useTailwind();
   const resolvedEntryPoint = TrendingFeedSessionManager.getInstance()
     .isFromTrending
     ? PredictEventValues.ENTRY_POINT.TRENDING
@@ -42,39 +46,12 @@ const PredictMarketSportCard: React.FC<PredictMarketSportCardProps> = ({
 
   const navigation =
     useNavigation<NavigationProp<PredictNavigationParamList>>();
-  const tw = useTailwind();
 
-  const { executeGuardedAction } = usePredictActionGuard({
-    providerId: market.providerId,
-    navigation,
-  });
-
-  const outcome = market.outcomes?.[0];
   const game = market.game;
-  const isEnded = game?.status === 'ended';
-
-  const handleBetPress = useCallback(
-    (token: PredictOutcomeToken) => {
-      executeGuardedAction(
-        () => {
-          navigation.navigate(Routes.PREDICT.MODALS.BUY_PREVIEW, {
-            market,
-            outcome,
-            outcomeToken: token,
-            entryPoint: resolvedEntryPoint,
-          });
-        },
-        {
-          checkBalance: true,
-          attemptedAction: PredictEventValues.ATTEMPTED_ACTION.PREDICT,
-        },
-      );
-    },
-    [executeGuardedAction, navigation, market, outcome, resolvedEntryPoint],
-  );
 
   return (
     <TouchableOpacity
+      style={tw.style(isCarousel ? '' : 'my-[8px]')}
       testID={testID}
       onPress={() => {
         navigation.navigate(Routes.PREDICT.ROOT, {
@@ -88,12 +65,19 @@ const PredictMarketSportCard: React.FC<PredictMarketSportCardProps> = ({
         });
       }}
     >
-      <PredictSportTeamGradient
-        awayColor={game?.awayTeam.color ?? '#1a2942'}
-        homeColor={game?.homeTeam.color ?? '#3d2621'}
-        borderRadius={16}
-        style={tw.style('w-full my-[8px]')}
-      >
+      <Box twClassName="bg-muted rounded-[16px]">
+        {onDismiss && (
+          <Box twClassName="absolute top-3 right-3 z-10">
+            <ButtonIcon
+              iconName={IconName.Close}
+              size={ButtonIconSize.Md}
+              iconProps={{ color: IconColor.IconDefault }}
+              onPress={onDismiss}
+              testID={testID ? `${testID}-close-button` : undefined}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            />
+          </Box>
+        )}
         <Box twClassName="p-4">
           <Text
             variant={TextVariant.HeadingSm}
@@ -110,16 +94,14 @@ const PredictMarketSportCard: React.FC<PredictMarketSportCardProps> = ({
             />
           )}
 
-          {outcome && !isEnded && (
-            <PredictActionButtons
-              market={market}
-              outcome={outcome}
-              onBetPress={handleBetPress}
-              testID={testID ? `${testID}-action-buttons` : undefined}
-            />
-          )}
+          <PredictSportCardFooter
+            market={market}
+            entryPoint={resolvedEntryPoint}
+            testID={testID ? `${testID}-footer` : undefined}
+            isCarousel={isCarousel}
+          />
         </Box>
-      </PredictSportTeamGradient>
+      </Box>
     </TouchableOpacity>
   );
 };

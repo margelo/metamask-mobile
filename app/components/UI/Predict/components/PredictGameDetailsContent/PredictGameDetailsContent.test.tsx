@@ -66,30 +66,6 @@ jest.mock('../PredictGameDetailsFooter/PredictGameAboutSheet', () => {
   };
 });
 
-jest.mock('../PredictSportTeamGradient', () => {
-  const { View } = jest.requireActual('react-native');
-  return function MockPredictSportTeamGradient({
-    children,
-    testID,
-    awayColor,
-    homeColor,
-  }: {
-    children: React.ReactNode;
-    testID?: string;
-    awayColor?: string;
-    homeColor?: string;
-  }) {
-    return (
-      <View
-        testID={testID}
-        accessibilityHint={`away:${awayColor ?? 'undefined'},home:${homeColor ?? 'undefined'}`}
-      >
-        {children}
-      </View>
-    );
-  };
-});
-
 jest.mock('../PredictSportScoreboard', () => {
   const { View } = jest.requireActual('react-native');
   return {
@@ -131,15 +107,15 @@ jest.mock('../PredictGameChart', () => {
   const { View } = jest.requireActual('react-native');
   return function MockPredictGameChart({
     testID,
-    tokenIds,
+    market,
   }: {
     testID?: string;
-    tokenIds?: string[];
+    market?: { id: string };
   }) {
     return (
       <View
         testID={testID}
-        accessibilityHint={`tokens:${tokenIds?.join(',') ?? 'none'}`}
+        accessibilityHint={`marketId:${market?.id ?? 'undefined'}`}
       />
     );
   };
@@ -461,29 +437,6 @@ describe('PredictGameDetailsContent', () => {
     });
   });
 
-  describe('Gradient Integration', () => {
-    it('renders gradient with team colors', () => {
-      const market = createMockMarket();
-
-      const { getByTestId } = render(
-        <PredictGameDetailsContent
-          market={market}
-          onBack={mockOnBack}
-          onRefresh={mockOnRefresh}
-          onBetPress={mockOnBetPress}
-          refreshing={false}
-        />,
-      );
-
-      const gradient = getByTestId('game-details-gradient');
-
-      expect(gradient).toBeOnTheScreen();
-      expect(gradient.props.accessibilityHint).toBe(
-        'away:#0000FF,home:#FF0000',
-      );
-    });
-  });
-
   describe('Scoreboard Integration', () => {
     it('renders scoreboard with team data', () => {
       const market = createMockMarket();
@@ -601,7 +554,7 @@ describe('PredictGameDetailsContent', () => {
   });
 
   describe('Chart Integration', () => {
-    it('renders chart with token IDs when two tokens exist', () => {
+    it('renders chart with market', () => {
       const market = createMockMarket();
 
       const { getByTestId } = render(
@@ -617,38 +570,7 @@ describe('PredictGameDetailsContent', () => {
       const chart = getByTestId('game-chart');
 
       expect(chart).toBeOnTheScreen();
-      expect(chart.props.accessibilityHint).toBe('tokens:token-1,token-2');
-    });
-
-    it('does not render chart when fewer than two tokens exist', () => {
-      const market = createMockMarket({
-        outcomes: [
-          {
-            id: 'outcome-1',
-            marketId: 'test-market-id',
-            title: 'Team A',
-            groupItemTitle: 'Team A',
-            status: 'open',
-            volume: 1000,
-            providerId: 'polymarket',
-            description: '',
-            image: '',
-            tokens: [{ id: 'token-1', title: 'Team A', price: 0.65 }],
-          },
-        ],
-      });
-
-      const { queryByTestId } = render(
-        <PredictGameDetailsContent
-          market={market}
-          onBack={mockOnBack}
-          onRefresh={mockOnRefresh}
-          onBetPress={mockOnBetPress}
-          refreshing={false}
-        />,
-      );
-
-      expect(queryByTestId('game-chart')).toBeNull();
+      expect(chart.props.accessibilityHint).toBe('marketId:test-market-id');
     });
   });
 
