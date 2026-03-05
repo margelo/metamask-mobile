@@ -26,6 +26,11 @@ class AppDelegate: ExpoAppDelegate {
   private var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
   private var reactNativeFactory: RCTReactNativeFactory?
 
+  // Detox's iOS React Native reload path still looks this up via KVC on the app delegate.
+  @objc var rootViewFactory: RCTRootViewFactory? {
+    reactNativeFactory?.rootViewFactory
+  }
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -42,7 +47,23 @@ class AppDelegate: ExpoAppDelegate {
     window?.makeKeyAndVisible()
 
     if FirebaseApp.app() == nil {
+#if DEBUG
+      if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+         let options = FirebaseOptions(contentsOfFile: path) {
+        let apiKey = options.apiKey ?? ""
+        let looksLikeValidApiKey = apiKey.hasPrefix("A") && apiKey.count == 39
+
+        if looksLikeValidApiKey {
+          FirebaseApp.configure(options: options)
+        } else {
+          NSLog("Skipping FirebaseApp.configure in DEBUG: invalid Firebase API key format in GoogleService-Info.plist")
+        }
+      } else {
+        NSLog("Skipping FirebaseApp.configure in DEBUG: GoogleService-Info.plist not found")
+      }
+#else
       FirebaseApp.configure()
+#endif
     }
 
     let foxCode = (Bundle.main.object(forInfoDictionaryKey: "fox_code") as? String) ?? "debug"

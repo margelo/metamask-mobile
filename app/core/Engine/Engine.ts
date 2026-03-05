@@ -1016,11 +1016,15 @@ export class Engine {
       KeyringTypes.snap,
     );
     if (!snapKeyring) {
+      Logger.log('[AUTH_DEBUG] getSnapKeyring: snap keyring not found, calling addNewKeyring, isUnlocked =', this.keyringController.state.isUnlocked);
       await this.keyringController.addNewKeyring(KeyringTypes.snap);
+      Logger.log('[AUTH_DEBUG] getSnapKeyring: addNewKeyring done');
       // TODO: Replace `getKeyringsByType` with `withKeyring`
       [snapKeyring] = this.keyringController.getKeyringsByType(
         KeyringTypes.snap,
       );
+    } else {
+      Logger.log('[AUTH_DEBUG] getSnapKeyring: snap keyring already exists');
     }
     return snapKeyring as SnapKeyring;
   };

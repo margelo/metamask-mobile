@@ -46,6 +46,7 @@ const ButtonBase = ({
       activeOpacity={1}
       onPress={onPress}
       style={styles.base}
+      accessibilityLabel={(props.accessibilityLabel ?? props.testID) ?? (props.testID)}
       accessibilityRole="button"
       accessible
       {...props}

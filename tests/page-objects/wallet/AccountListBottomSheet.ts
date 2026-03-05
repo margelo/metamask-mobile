@@ -1,15 +1,32 @@
+import { waitFor } from 'detox';
 import { CellComponentSelectorsIDs } from '../../../app/component-library/components/Cells/Cell/CellComponent.testIds';
 import {
   AccountListBottomSheetSelectorsIDs,
   AccountListBottomSheetSelectorsText,
 } from '../../../app/components/Views/AccountSelector/AccountListBottomSheet.testIds';
+import { AddAccountBottomSheetSelectorsIDs } from '../../../app/components/Views/AddAccountActions/AddAccountBottomSheet.testIds';
 import { WalletViewSelectorsIDs } from '../../../app/components/Views/Wallet/WalletView.testIds';
 import { ConnectAccountBottomSheetSelectorsIDs } from '../../../app/components/Views/AccountConnect/ConnectAccountBottomSheet.testIds';
 import { AccountCellIds } from '../../../app/component-library/components-temp/MultichainAccounts/AccountCell/AccountCell.testIds';
 import Matchers from '../../framework/Matchers';
 import Gestures from '../../framework/Gestures';
+import { createLogger } from '../../framework/logger';
+
+const logger = createLogger({ name: 'AccountListBottomSheet' });
 
 class AccountListBottomSheet {
+  get importSrpAction(): DetoxElement {
+    return Matchers.getElementByID(
+      AddAccountBottomSheetSelectorsIDs.IMPORT_SRP_BUTTON,
+    );
+  }
+
+  get importAccountAction(): DetoxElement {
+    return Matchers.getElementByID(
+      AddAccountBottomSheetSelectorsIDs.IMPORT_ACCOUNT_BUTTON,
+    );
+  }
+
   get accountList(): DetoxElement {
     return Matchers.getElementByID(
       AccountListBottomSheetSelectorsIDs.ACCOUNT_LIST_ID,
@@ -36,6 +53,211 @@ class AccountListBottomSheet {
     return Matchers.getElementByID(
       AccountListBottomSheetSelectorsIDs.ACCOUNT_LIST_ADD_BUTTON_ID,
     );
+  }
+
+  private async countElementsById(testId: string): Promise<number> {
+    let count = 0;
+
+    for (;;) {
+      try {
+        await waitFor(element(by.id(testId)).atIndex(count))
+          .toExist()
+          .withTimeout(100);
+        count += 1;
+      } catch {
+        return count;
+      }
+    }
+  }
+
+  private async logAccountNamesV2(): Promise<void> {
+    const count = await this.countElementsById(AccountCellIds.ADDRESS);
+    logger.debug(`V2 account cell count: ${AccountCellIds.ADDRESS}=${count}`);
+
+    for (let index = 0; index < count; index += 1) {
+      try {
+        const accountElement = (await Matchers.getElementByID(
+          AccountCellIds.ADDRESS,
+          index,
+        )) as Detox.IndexableNativeElement;
+        const attributes = await accountElement.getAttributes();
+        logger.debug(
+          `V2 account cell[${index}] attributes: ${JSON.stringify({
+            text: 'text' in attributes ? attributes.text : undefined,
+            label: 'label' in attributes ? attributes.label : undefined,
+            identifier:
+              'identifier' in attributes ? attributes.identifier : undefined,
+            frame: 'frame' in attributes ? attributes.frame : undefined,
+          })}`,
+        );
+      } catch (error) {
+        logger.debug(`V2 account cell[${index}] attributes unavailable`, error);
+      }
+    }
+  }
+
+  private async getPreferredAddWalletButton(): Promise<Detox.IndexableNativeElement> {
+    const addWalletButtonCount = await this.countElementsById(
+      AccountListBottomSheetSelectorsIDs.ACCOUNT_LIST_ADD_BUTTON_ID,
+    );
+    logger.debug(
+      `Add wallet button count: ${AccountListBottomSheetSelectorsIDs.ACCOUNT_LIST_ADD_BUTTON_ID}=${addWalletButtonCount}`,
+    );
+
+    for (let index = 0; index < addWalletButtonCount; index += 1) {
+      const candidate = (await Matchers.getElementByID(
+        AccountListBottomSheetSelectorsIDs.ACCOUNT_LIST_ADD_BUTTON_ID,
+        index,
+      )) as Detox.IndexableNativeElement;
+
+      let isVisible = false;
+      try {
+        await waitFor(candidate).toBeVisible().withTimeout(100);
+        isVisible = true;
+      } catch {
+        // Keep scanning for a visible match.
+      }
+
+      logger.debug(`Add wallet button[${index}] visible=${isVisible}`);
+      if (isVisible) {
+        return candidate;
+      }
+    }
+
+    return (await Matchers.getElementByID(
+      AccountListBottomSheetSelectorsIDs.ACCOUNT_LIST_ADD_BUTTON_ID,
+      0,
+    )) as Detox.IndexableNativeElement;
+  }
+
+  private async logAddWalletButtonAttributes(
+    button: Detox.IndexableNativeElement,
+  ): Promise<Detox.ElementAttributes> {
+    const attributes = await button.getAttributes();
+    logger.debug(
+      `Add wallet button attributes: ${JSON.stringify(
+        this.extractDebugAttributes(attributes),
+      )}`,
+    );
+    return attributes;
+  }
+
+  private extractDebugAttributes(attributes: Detox.ElementAttributes) {
+    return {
+      enabled: 'enabled' in attributes ? attributes.enabled : undefined,
+      label: 'label' in attributes ? attributes.label : undefined,
+      text: 'text' in attributes ? attributes.text : undefined,
+      identifier: 'identifier' in attributes ? attributes.identifier : undefined,
+      frame: 'frame' in attributes ? attributes.frame : undefined,
+      visible: 'visible' in attributes ? attributes.visible : undefined,
+      activationPoint:
+        'activationPoint' in attributes ? attributes.activationPoint : undefined,
+      normalizedActivationPoint:
+        'normalizedActivationPoint' in attributes
+          ? attributes.normalizedActivationPoint
+          : undefined,
+    };
+  }
+
+  private async logElementSnapshot(
+    name: string,
+    targetElement: Detox.IndexableNativeElement,
+  ): Promise<void> {
+    try {
+      const attributes = await targetElement.getAttributes();
+      logger.debug(
+        `${name}: ${JSON.stringify(this.extractDebugAttributes(attributes))}`,
+      );
+    } catch (error) {
+      logger.debug(`${name} unavailable`, error);
+    }
+  }
+
+  private async logActionCounts(
+    label: string,
+    actionIds: string[],
+  ): Promise<void> {
+    const counts = await Promise.all(
+      actionIds.map(async (actionId) => ({
+        actionId,
+        count: await this.countElementsById(actionId),
+      })),
+    );
+    logger.debug(
+      `${label}: ${counts
+        .map(({ actionId, count }) => `${actionId}=${count}`)
+        .join(', ')}`,
+    );
+  }
+
+  private async logPostTapDiagnostics(
+    context: string,
+    button: Detox.IndexableNativeElement,
+    actionIds: string[] = [],
+  ): Promise<void> {
+    await this.logElementSnapshot(`${context} button snapshot immediately`, button);
+    await this.logElementSnapshot(
+      `${context} account list snapshot immediately`,
+      (await this.accountList) as Detox.IndexableNativeElement,
+    );
+    if (actionIds.length > 0) {
+      await this.logActionCounts(`${context} action counts immediately`, actionIds);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await this.logElementSnapshot(`${context} button snapshot after 300ms`, button);
+    if (actionIds.length > 0) {
+      await this.logActionCounts(`${context} action counts after 300ms`, actionIds);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    await this.logElementSnapshot(`${context} button snapshot after 1500ms`, button);
+    await this.logElementSnapshot(
+      `${context} account list snapshot after 1500ms`,
+      (await this.accountList) as Detox.IndexableNativeElement,
+    );
+    if (actionIds.length > 0) {
+      await this.logActionCounts(`${context} action counts after 1500ms`, actionIds);
+    }
+  }
+
+  private async waitForButtonToLeaveSyncingState(
+    button: Detox.IndexableNativeElement,
+    description: string,
+    timeout = 25000,
+  ): Promise<Detox.ElementAttributes> {
+    const deadline = Date.now() + timeout;
+    let lastAttributes = await button.getAttributes();
+
+    for (;;) {
+      const text =
+        'text' in lastAttributes ? String(lastAttributes.text ?? '') : '';
+      const label =
+        'label' in lastAttributes ? String(lastAttributes.label ?? '') : '';
+      const normalizedText = text.trim();
+      const normalizedLabel = label.trim();
+      const loadingStates = new Set([
+        'Syncing',
+        'Discovering accounts...',
+        'Discovering accounts',
+      ]);
+      const isSyncing =
+        loadingStates.has(normalizedText) || loadingStates.has(normalizedLabel);
+
+      if (!isSyncing) {
+        return lastAttributes;
+      }
+
+      if (Date.now() >= deadline) {
+        logger.debug(
+          `${description} remained in Syncing state after ${timeout}ms; proceeding with last known attributes.`,
+        );
+        return lastAttributes;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      lastAttributes = await button.getAttributes();
+    }
   }
 
   get addEthereumAccountButton(): DetoxElement {
@@ -74,6 +296,73 @@ class AccountListBottomSheet {
 
   getAccountElementByAccountNameV2(accountName: string): DetoxElement {
     return Matchers.getElementByIDAndLabel(AccountCellIds.ADDRESS, accountName);
+  }
+
+  async expectAccountByNameV2(
+    accountName: string,
+    options: { timeout?: number; description?: string } = {},
+  ): Promise<void> {
+    const {
+      timeout = 15000,
+      description = `Account with name "${accountName}" should be present`,
+    } = options;
+    const isAndroid = device.getPlatform() === 'android';
+    const effectiveTimeout = isAndroid ? Math.max(timeout, 30000) : timeout;
+    const accountElement =
+      (await this.getAccountElementByAccountNameV2(
+        accountName,
+      )) as Detox.IndexableNativeElement;
+
+    if (isAndroid) {
+      logger.debug(
+        `Expecting V2 account by existence on Android: ${accountName}`,
+      );
+      try {
+        await waitFor(accountElement).toExist().withTimeout(effectiveTimeout);
+        return;
+      } catch {
+        logger.debug(
+          `V2 account by id+label did not resolve for "${accountName}", attempting text-based search with scrolling.`,
+        );
+      }
+
+      const accountByText =
+        (await Matchers.getElementByText(
+          accountName,
+        )) as Detox.IndexableNativeElement;
+      const deadline = Date.now() + effectiveTimeout;
+      let attempt = 0;
+
+      while (Date.now() < deadline) {
+        try {
+          await waitFor(accountByText).toBeVisible().withTimeout(300);
+          logger.debug(
+            `Resolved V2 account "${accountName}" using text fallback after ${attempt} scroll attempt(s).`,
+          );
+          return;
+        } catch {
+          // Continue and scroll to search for virtualized rows.
+        }
+
+        const direction = attempt % 3 === 2 ? 'down' : 'up';
+        await Gestures.swipe(this.accountList, direction, {
+          speed: 'fast',
+          percentage: 0.35,
+        });
+        attempt += 1;
+      }
+
+      try {
+        await waitFor(accountElement).toExist().withTimeout(500);
+      } catch (error) {
+        await this.logAccountNamesV2();
+        throw error;
+      }
+      return;
+    }
+
+    await waitFor(accountElement).toBeVisible().withTimeout(effectiveTimeout);
+    logger.debug(description);
   }
 
   async getSelectElement(index: number): DetoxElement {
@@ -129,24 +418,146 @@ class AccountListBottomSheet {
   }
 
   async tapAddAccountButton(): Promise<void> {
-    await Gestures.waitAndTap(this.addAccountButton, {
-      elemDescription: 'Add Account button',
-    });
+    const addWalletActionIds = [
+      AddAccountBottomSheetSelectorsIDs.IMPORT_ACCOUNT_BUTTON,
+      AddAccountBottomSheetSelectorsIDs.IMPORT_SRP_BUTTON,
+    ];
+    const waitForAddWalletActions = async () => {
+      const importSrpAction =
+        (await this.importSrpAction) as Detox.IndexableNativeElement;
+      const importAccountAction =
+        (await this.importAccountAction) as Detox.IndexableNativeElement;
+
+      await waitFor(importSrpAction).toExist().withTimeout(3000);
+      await waitFor(importAccountAction).toExist().withTimeout(10000);
+    };
+
+    const addWalletButton = await this.getPreferredAddWalletButton();
+    const addWalletButtonAttributes =
+      await this.logAddWalletButtonAttributes(addWalletButton);
+
+    if ('frame' in addWalletButtonAttributes) {
+      const tapPoint = {
+        x: Math.round(
+          addWalletButtonAttributes.frame.x +
+            addWalletButtonAttributes.frame.width / 2,
+        ),
+        y: Math.round(
+          addWalletButtonAttributes.frame.y +
+            addWalletButtonAttributes.frame.height / 2,
+        ),
+      };
+      logger.debug(
+        `Add wallet button coordinate tap point: ${JSON.stringify(tapPoint)}`,
+      );
+      await device.tap(tapPoint, false);
+    } else {
+      logger.debug(
+        'Add wallet button frame unavailable, falling back to semantic tap first.',
+      );
+      await Gestures.waitAndTap(Promise.resolve(addWalletButton), {
+        elemDescription: 'Add wallet button',
+        checkVisibility: false,
+        checkStability: true,
+      });
+    }
+
+    await this.logPostTapDiagnostics(
+      'Add wallet',
+      addWalletButton,
+      addWalletActionIds,
+    );
+
+    try {
+      await waitForAddWalletActions();
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+      await this.logActionCounts(
+        'Add wallet action counts after 10s',
+        addWalletActionIds,
+      );
+
+      logger.debug(
+        'Add wallet action IDs still missing after coordinate tap; retrying with semantic tap.',
+      );
+      await Gestures.waitAndTap(Promise.resolve(addWalletButton), {
+        elemDescription: 'Add wallet button',
+        checkVisibility: false,
+        checkStability: true,
+      });
+      await this.logPostTapDiagnostics(
+        'Add wallet semantic retry',
+        addWalletButton,
+        addWalletActionIds,
+      );
+
+      try {
+        await waitForAddWalletActions();
+      } catch {
+        throw new Error(
+          'Add wallet footer button did not expose the add-wallet action testIDs ' +
+            `(${AddAccountBottomSheetSelectorsIDs.IMPORT_SRP_BUTTON}, ` +
+            `${AddAccountBottomSheetSelectorsIDs.IMPORT_ACCOUNT_BUTTON}) ` +
+            'after both coordinate and semantic taps.',
+        );
+      }
+    }
   }
 
   async tapAddAccountButtonV2(options?: {
     srpIndex?: number;
     shouldWait?: boolean;
   }): Promise<void> {
-    const button = Matchers.getElementByID(
+    const createAccountCount = await this.countElementsById(
       AccountListBottomSheetSelectorsIDs.CREATE_ACCOUNT,
-      options?.srpIndex ?? 0,
+    );
+    logger.debug(
+      `Add Account button V2 count: ${AccountListBottomSheetSelectorsIDs.CREATE_ACCOUNT}=${createAccountCount}`,
     );
 
-    await Gestures.waitAndTap(button, {
+    const button = (await Matchers.getElementByID(
+      AccountListBottomSheetSelectorsIDs.CREATE_ACCOUNT,
+      options?.srpIndex ?? 0,
+    )) as Detox.IndexableNativeElement;
+
+    if (options?.shouldWait) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+
+    const attributes = await this.waitForButtonToLeaveSyncingState(
+      button,
+      'Add Account button V2',
+    );
+    logger.debug(
+      `Add Account button V2 attributes: ${JSON.stringify({
+        enabled: 'enabled' in attributes ? attributes.enabled : undefined,
+        label: 'label' in attributes ? attributes.label : undefined,
+        text: 'text' in attributes ? attributes.text : undefined,
+        identifier:
+          'identifier' in attributes ? attributes.identifier : undefined,
+        frame: 'frame' in attributes ? attributes.frame : undefined,
+      })}`,
+    );
+
+    if ('frame' in attributes) {
+      const tapPoint = {
+        x: Math.round(attributes.frame.x + attributes.frame.width / 2),
+        y: Math.round(attributes.frame.y + attributes.frame.height / 2),
+      };
+      logger.debug(
+        `Add Account button V2 coordinate tap point: ${JSON.stringify(tapPoint)}`,
+      );
+      await device.tap(tapPoint, false);
+      await this.logPostTapDiagnostics('Add Account V2', button);
+      return;
+    }
+
+    await Gestures.waitAndTap(Promise.resolve(button), {
       elemDescription: 'Add Account button in V2 multichain accounts',
-      delay: options?.shouldWait ? 5000 : 0,
+      checkVisibility: false,
+      checkStability: true,
     });
+    await this.logPostTapDiagnostics('Add Account V2 semantic fallback', button);
   }
 
   async tapAddEthereumAccountButton(): Promise<void> {
@@ -194,8 +605,8 @@ class AccountListBottomSheet {
   }
 
   async tapAccountByNameV2(accountName: string): Promise<void> {
-    const element = this.getAccountElementByAccountNameV2(accountName);
-    await Gestures.waitAndTap(element, {
+    const accountElement = this.getAccountElementByAccountNameV2(accountName);
+    await Gestures.waitAndTap(accountElement, {
       elemDescription: `Tap on account with name: ${accountName}`,
     });
   }

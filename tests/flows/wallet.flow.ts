@@ -385,6 +385,14 @@ export const switchToSepoliaNetwork = async (): Promise<void> => {
  */
 export const loginToApp = async (password?: string): Promise<void> => {
   const PASSWORD = password ?? '123123123';
+  const shouldDisableSynchronization = device.getPlatform() === 'android';
+
+  if (shouldDisableSynchronization) {
+    logger.debug(
+      'Disabling Detox synchronization for Android login flow due to bridgeless Fabric timers remaining busy during startup.',
+    );
+    await device.disableSynchronization();
+  }
 
   // Wait for app to complete rehydration ONCE before attempting login
   await waitForAppReady();

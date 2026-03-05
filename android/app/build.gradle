@@ -217,6 +217,8 @@ android {
       ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
 
+    def internalReleaseKeystore = file('../keystores/internalRelease.keystore')
+
 	  signingConfigs {
       mainProd {
         storeFile file('../keystores/release.keystore')
@@ -243,10 +245,10 @@ android {
         keyPassword System.getenv("BITRISEIO_ANDROID_QA_KEYSTORE_PRIVATE_KEY_PASSWORD")
       }
       mainE2e {
-        storeFile file('../keystores/internalRelease.keystore')
-        storePassword System.getenv("BITRISEIO_ANDROID_QA_KEYSTORE_PASSWORD")
-        keyAlias System.getenv("BITRISEIO_ANDROID_QA_KEYSTORE_ALIAS")
-        keyPassword System.getenv("BITRISEIO_ANDROID_QA_KEYSTORE_PRIVATE_KEY_PASSWORD")
+        storeFile internalReleaseKeystore.exists() ? internalReleaseKeystore : file('debug.keystore')
+        storePassword internalReleaseKeystore.exists() ? System.getenv("BITRISEIO_ANDROID_QA_KEYSTORE_PASSWORD") : 'android'
+        keyAlias internalReleaseKeystore.exists() ? System.getenv("BITRISEIO_ANDROID_QA_KEYSTORE_ALIAS") : 'androiddebugkey'
+        keyPassword internalReleaseKeystore.exists() ? System.getenv("BITRISEIO_ANDROID_QA_KEYSTORE_PRIVATE_KEY_PASSWORD") : 'android'
       }
       mainExp {
         storeFile file('../keystores/internalRelease.keystore')

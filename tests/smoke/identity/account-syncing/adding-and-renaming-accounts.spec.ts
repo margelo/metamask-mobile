@@ -65,10 +65,8 @@ describe(
             },
           );
 
-          await Assertions.expectElementToBeVisible(
-            AccountListBottomSheet.getAccountElementByAccountNameV2(
-              DEFAULT_ACCOUNT_NAME,
-            ),
+          await AccountListBottomSheet.expectAccountByNameV2(
+            DEFAULT_ACCOUNT_NAME,
             {
               description: `Account with name "${DEFAULT_ACCOUNT_NAME}" should be visible`,
             },
@@ -85,10 +83,8 @@ describe(
           await AccountListBottomSheet.tapAddAccountButtonV2();
           await waitUntilEventsEmittedNumberEquals(1);
 
-          await Assertions.expectElementToBeVisible(
-            AccountListBottomSheet.getAccountElementByAccountNameV2(
-              ADDED_ACCOUNT_NAME,
-            ),
+          await AccountListBottomSheet.expectAccountByNameV2(
+            ADDED_ACCOUNT_NAME,
             {
               description: `Account with name "${ADDED_ACCOUNT_NAME}" should be visible`,
             },
@@ -130,20 +126,16 @@ describe(
           );
 
           // Should see default account
-          await Assertions.expectElementToBeVisible(
-            AccountListBottomSheet.getAccountElementByAccountNameV2(
-              DEFAULT_ACCOUNT_NAME,
-            ),
+          await AccountListBottomSheet.expectAccountByNameV2(
+            DEFAULT_ACCOUNT_NAME,
             {
               description: `Account with name "${DEFAULT_ACCOUNT_NAME}" should be visible`,
             },
           );
 
           // Should ALSO see the account added in the previous test
-          await Assertions.expectElementToBeVisible(
-            AccountListBottomSheet.getAccountElementByAccountNameV2(
-              ADDED_ACCOUNT_NAME,
-            ),
+          await AccountListBottomSheet.expectAccountByNameV2(
+            ADDED_ACCOUNT_NAME,
             {
               description: `Account with name "${ADDED_ACCOUNT_NAME}" from previous test should still be visible`,
             },
@@ -200,30 +192,24 @@ describe(
           );
 
           // Should see default account
-          await Assertions.expectElementToBeVisible(
-            AccountListBottomSheet.getAccountElementByAccountNameV2(
-              DEFAULT_ACCOUNT_NAME,
-            ),
+          await AccountListBottomSheet.expectAccountByNameV2(
+            DEFAULT_ACCOUNT_NAME,
             {
               description: `Account with name "${DEFAULT_ACCOUNT_NAME}" should be visible`,
             },
           );
 
           // Should still see the account added in the previous test, with new name
-          await Assertions.expectElementToBeVisible(
-            AccountListBottomSheet.getAccountElementByAccountNameV2(
-              NEW_ACCOUNT_NAME,
-            ),
+          await AccountListBottomSheet.expectAccountByNameV2(
+            NEW_ACCOUNT_NAME,
             {
               description: `Account with name "${NEW_ACCOUNT_NAME}" from previous test should still be visible`,
             },
           );
 
           // Should also see the 3rd account added in the previous test
-          await Assertions.expectElementToBeVisible(
-            AccountListBottomSheet.getAccountElementByAccountNameV2(
-              LAST_ACCOUNT_NAME,
-            ),
+          await AccountListBottomSheet.expectAccountByNameV2(
+            LAST_ACCOUNT_NAME,
             {
               description: `Account with name "${LAST_ACCOUNT_NAME}" from previous test should still be visible`,
             },

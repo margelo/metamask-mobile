@@ -2,6 +2,7 @@ pluginManagement {
     includeBuild(new File(["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().toString())
     repositories {
         gradlePluginPortal()
+        mavenCentral()
         mavenLocal()
         google()
     }
@@ -30,17 +31,20 @@ rootProject.name = 'MetaMask'
 
 dependencyResolutionManagement {
   versionCatalogs {
-    reactAndroidLibs {
+    libs {
       from(files(new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../gradle/libs.versions.toml")))
     }
   }
 }
 
 include ':app'
-includeBuild(new File(["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile())
-includeBuild('../node_modules/@react-native') {}
+includeBuild('../node_modules/@react-native/gradle-plugin')
 include ':react-native-gesture-handler'
 project(':react-native-gesture-handler').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-gesture-handler/android')
+include ':packages:react-native:ReactAndroid'
+project(':packages:react-native:ReactAndroid').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/ReactAndroid')
+include ':packages:react-native:ReactAndroid:hermes-engine'
+project(':packages:react-native:ReactAndroid:hermes-engine').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/ReactAndroid/hermes-engine')
 
 // Build React Native from source but use prebuilt Hermes from Maven Central.
 // This speeds up build significantly by avoiding Hermes engine compilation.

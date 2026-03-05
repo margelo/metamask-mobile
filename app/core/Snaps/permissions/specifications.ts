@@ -136,7 +136,7 @@ export const getSnapPermissionSpecifications = (
       }
 
       try {
-        const { type, mnemonic } = (await messenger.call(
+        const keyringResult = (await messenger.call(
           'KeyringController:withKeyring',
           {
             id: source,
@@ -145,7 +145,16 @@ export const getSnapPermissionSpecifications = (
             type: keyring.type,
             mnemonic: (keyring as unknown as HdKeyring).mnemonic,
           }),
-        )) as { type: string; mnemonic?: Uint8Array };
+        )) as { type?: string; mnemonic?: Uint8Array } | undefined;
+
+        Logger.log('[SNAPS DEBUG] getMnemonic withKeyring result', {
+          source,
+          hasResult: Boolean(keyringResult),
+          type: keyringResult?.type,
+          hasMnemonic: Boolean(keyringResult?.mnemonic),
+        });
+
+        const { type, mnemonic } = keyringResult ?? {};
 
         if (type !== KeyringTypes.hd || !mnemonic) {
           // The keyring isn't guaranteed to have a mnemonic (e.g.,
@@ -155,7 +164,11 @@ export const getSnapPermissionSpecifications = (
         }
 
         return mnemonic;
-      } catch {
+      } catch (error) {
+        Logger.log('[SNAPS DEBUG] getMnemonic failed', {
+          source,
+          error,
+        });
         throw new Error(`Entropy source with ID "${source}" not found.`);
       }
     },
@@ -165,7 +178,7 @@ export const getSnapPermissionSpecifications = (
       }
 
       try {
-        const { type, seed } = (await messenger.call(
+        const keyringResult = (await messenger.call(
           'KeyringController:withKeyring',
           {
             id: source,
@@ -174,7 +187,16 @@ export const getSnapPermissionSpecifications = (
             type: keyring.type,
             seed: (keyring as unknown as HdKeyring).seed,
           }),
-        )) as { type: string; seed?: Uint8Array };
+        )) as { type?: string; seed?: Uint8Array } | undefined;
+
+        Logger.log('[SNAPS DEBUG] getMnemonicSeed withKeyring result', {
+          source,
+          hasResult: Boolean(keyringResult),
+          type: keyringResult?.type,
+          hasSeed: Boolean(keyringResult?.seed),
+        });
+
+        const { type, seed } = keyringResult ?? {};
 
         if (type !== KeyringTypes.hd || !seed) {
           // The keyring isn't guaranteed to have a seed (e.g.,
@@ -184,7 +206,11 @@ export const getSnapPermissionSpecifications = (
         }
 
         return seed;
-      } catch {
+      } catch (error) {
+        Logger.log('[SNAPS DEBUG] getMnemonicSeed failed', {
+          source,
+          error,
+        });
         throw new Error(`Entropy source with ID "${source}" not found.`);
       }
     },

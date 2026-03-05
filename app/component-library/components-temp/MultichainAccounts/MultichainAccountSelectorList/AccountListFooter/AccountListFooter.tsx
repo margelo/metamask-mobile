@@ -138,6 +138,7 @@ const AccountListFooter = memo(
           onPress={handlePress}
           disabled={isLoadingState || !walletInfo?.keyringId}
           activeOpacity={0.7}
+          testID={AccountListBottomSheetSelectorsIDs.CREATE_ACCOUNT}
         >
           <View style={styles.iconContainer}>
             {isLoadingState ? (
@@ -153,7 +154,6 @@ const AccountListFooter = memo(
           <Text
             variant={TextVariant.BodyMd}
             style={styles.buttonText}
-            testID={AccountListBottomSheetSelectorsIDs.CREATE_ACCOUNT}
           >
             {actionLabel}
           </Text>

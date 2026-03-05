@@ -61,12 +61,24 @@ export default class Matchers {
    * Get element by label (accessibility label on iOS, content description on Android)
    */
   static async getElementByLabel(
-    label: string,
+    label: string | RegExp,
     index = 0,
   ): Promise<Detox.IndexableNativeElement> {
     return element(by.label(label)).atIndex(
       index,
     ) as Detox.IndexableNativeElement;
+  }
+
+  /**
+   * Get element by label (case-insensitive contains).
+   */
+  static async getElementByLabelContains(
+    containsText: string,
+    index = 0,
+  ): Promise<Detox.IndexableNativeElement> {
+    const escaped = containsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(escaped, 'i');
+    return this.getElementByLabel(pattern, index);
   }
 
   /**

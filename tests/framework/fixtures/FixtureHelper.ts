@@ -624,6 +624,13 @@ export async function withFixtures(
         languageAndLocale,
         permissions,
       });
+
+      if (isAndroid) {
+        logger.debug(
+          'Disabling Detox synchronization after Android fixture relaunch because bridgeless Fabric timers stay busy during startup.',
+        );
+        await device.disableSynchronization();
+      }
     }
 
     // Dismiss dev screens if running locally (not in CI)
@@ -677,8 +684,11 @@ export async function withFixtures(
       }
     }
 
+    const shouldReloadReactNative =
+      !skipReactNativeReload && device.getPlatform() !== 'android';
+
     // skipReactNativeReload needs to happen before killing the mock server to avoid race conditions
-    if (!skipReactNativeReload) {
+    if (shouldReloadReactNative) {
       try {
         // Disable synchronization to prevent race conditions with pending timers
         await device.disableSynchronization();
@@ -694,6 +704,10 @@ export async function withFixtures(
         }
         // Don't add to cleanupErrors as this is a non-critical cleanup operation
       }
+    } else if (!skipReactNativeReload && device.getPlatform() === 'android') {
+      logger.debug(
+        'Skipping React Native reload during Android cleanup because Detox reload is unstable on bridgeless RN.',
+      );
     }
 
     if (mockServerInstance) {

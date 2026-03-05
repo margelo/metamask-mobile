@@ -151,6 +151,30 @@ jest.mock('react-native-quick-crypto', () => {
   };
 });
 
+jest.mock('react-native-mmkv', () => {
+  const createStorage = () => {
+    const store = new Map();
+
+    return {
+      clearAll: jest.fn(() => store.clear()),
+      contains: jest.fn((key) => store.has(key)),
+      delete: jest.fn((key) => store.delete(key)),
+      getAllKeys: jest.fn(() => Array.from(store.keys())),
+      getBoolean: jest.fn((key) => store.get(key)),
+      getNumber: jest.fn((key) => store.get(key)),
+      getString: jest.fn((key) => store.get(key)),
+      remove: jest.fn((key) => store.delete(key)),
+      set: jest.fn((key, value) => store.set(key, value)),
+      addOnValueChangedListener: jest.fn(() => ({ remove: jest.fn() })),
+    };
+  };
+
+  return {
+    MMKV: jest.fn(() => createStorage()),
+    createMMKV: jest.fn(() => createStorage()),
+  };
+});
+
 // Mock global crypto
 global.crypto = {
   getRandomValues: (arr) => getRandomValuesCompat(arr),

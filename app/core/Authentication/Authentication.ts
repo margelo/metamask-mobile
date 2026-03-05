@@ -518,23 +518,34 @@ class AuthenticationService {
     authData: AuthData,
   ): Promise<void> => {
     try {
+      Logger.log('[AUTH_DEBUG] newWalletAndKeychain: start, authType =', authData.currentAuthType, 'oauth2 =', authData.oauth2Login);
       // check for oauth2 login
       if (authData.oauth2Login) {
         await this.createAndBackupSeedPhrase(password);
       } else {
         await this.createWalletVaultAndKeychain(password);
       }
+      Logger.log('[AUTH_DEBUG] newWalletAndKeychain: vault created, keyring isUnlocked =', Engine.context.KeyringController.state.isUnlocked);
 
       await this.storePassword(password, authData.currentAuthType, true);
+      Logger.log('[AUTH_DEBUG] newWalletAndKeychain: storePassword done, keyring isUnlocked =', Engine.context.KeyringController.state.isUnlocked);
       ReduxService.store.dispatch(setExistingUser(true));
       await StorageWrapper.removeItem(SEED_PHRASE_HINTS);
+
+      // Unlock keyring before dispatchLogin — the keyring may have been locked
+      // during the biometric prompt in storePassword (same pattern as createAndBackupSeedPhrase).
+      Logger.log('[AUTH_DEBUG] newWalletAndKeychain: calling submitPassword');
+      await Engine.context.KeyringController.submitPassword(password);
+      Logger.log('[AUTH_DEBUG] newWalletAndKeychain: submitPassword done, keyring isUnlocked =', Engine.context.KeyringController.state.isUnlocked);
 
       await this.dispatchLogin({
         clearAccountTreeState: true,
       });
+      Logger.log('[AUTH_DEBUG] newWalletAndKeychain: dispatchLogin done');
       // TODO: Replace "any" with type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
+      Logger.log('[AUTH_DEBUG] newWalletAndKeychain: ERROR', (e as Error).message);
       await this.lockApp({ reset: false, navigateToLogin: false });
       throw new AuthenticationError(
         (e as Error).message,

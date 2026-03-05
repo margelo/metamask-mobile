@@ -440,6 +440,10 @@ prebuild_android(){
 		echo "google-services.json has been created successfully."
 		# Ensure the file has read and write permissions
 		chmod 664 ./android/app/google-services.json
+	elif [ -f ./android/app/google-services-example.json ]; then
+		cp ./android/app/google-services-example.json ./android/app/google-services.json
+		echo "GOOGLE_SERVICES_B64_ANDROID is not set. Using android/app/google-services-example.json for local builds."
+		chmod 664 ./android/app/google-services.json
 	else
 		echo "GOOGLE_SERVICES_B64_ANDROID is not set in the .env file."
 		exit 1
@@ -599,8 +603,9 @@ generateAndroidBinary() {
 
 		# Memory optimization for E2E builds (Keep an eye out if this breaks outside of E2E CI builds)
 		if [ "$METAMASK_ENVIRONMENT" = "e2e" ] ; then
-			# Only build for x86_64 for E2E builds
-			reactNativeArchitecturesArg="-PreactNativeArchitectures=x86_64"
+			# Default emulator builds to x86_64, but allow overriding for attached devices.
+			local e2eReactNativeArchitectures="${DETOX_ANDROID_ARCHITECTURES:-x86_64}"
+			reactNativeArchitecturesArg="-PreactNativeArchitectures=${e2eReactNativeArchitectures}"
 			# Enable verbose logging for E2E builds to help diagnose build failures
 			gradleLoggingFlags="--stacktrace --info"
 		fi

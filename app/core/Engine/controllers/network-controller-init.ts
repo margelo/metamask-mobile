@@ -15,12 +15,37 @@ import {
   onRpcEndpointDegraded,
   onRpcEndpointUnavailable,
 } from './network-controller/messenger-action-handlers';
-import { Hex, Json } from '@metamask/utils';
+import { Hex, Json, isObject } from '@metamask/utils';
 import Logger from '../../../util/Logger';
 import { buildAndTrackEvent } from '../utils/analytics';
 import { CONNECTIVITY_STATUSES } from '@metamask/connectivity-controller';
 
 const NON_EMPTY = 'NON_EMPTY';
+
+const getRpcMethodFromFetchBody = (body: unknown) => {
+  if (typeof body !== 'string') {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(body) as { method?: unknown };
+    return typeof parsed.method === 'string' ? parsed.method : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const isUnauthorizedRpcError = (error: unknown) => {
+  if (!isObject(error)) {
+    return false;
+  }
+
+  const code = 'code' in error ? error.code : undefined;
+  const data = 'data' in error && isObject(error.data) ? error.data : undefined;
+  const httpStatus = data && 'httpStatus' in data ? data.httpStatus : undefined;
+
+  return code === -32006 || httpStatus === 401;
+};
 
 export const ADDITIONAL_DEFAULT_NETWORKS = [
   ChainId['megaeth-testnet-v2'],
@@ -121,6 +146,11 @@ export const networkControllerInit: ControllerInitFunction<
 > = ({ controllerMessenger, initMessenger, persistedState, analyticsId }) => {
   const infuraProjectId = INFURA_PROJECT_ID || NON_EMPTY;
 
+  Logger.log('[NETWORK DEBUG] NetworkController init', {
+    hasInfuraProjectId: Boolean(INFURA_PROJECT_ID),
+    usingInfuraFallbackPlaceholder: infuraProjectId === NON_EMPTY,
+  });
+
   const controller = new NetworkController({
     infuraProjectId,
     state: getInitialNetworkControllerState(persistedState),
@@ -148,7 +178,24 @@ export const networkControllerInit: ControllerInitFunction<
         );
       };
       const commonOptions = {
-        fetch: globalThis.fetch.bind(globalThis),
+        fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+          const response = await globalThis.fetch(input, init);
+
+          if (response.status === 401) {
+            Logger.log('[NETWORK DEBUG] RPC fetch returned 401', {
+              rpcEndpointUrl,
+              rpcMethodName: getRpcMethodFromFetchBody(init?.body),
+              requestUrl:
+                typeof input === 'string'
+                  ? input
+                  : input instanceof URL
+                  ? input.toString()
+                  : undefined,
+            });
+          }
+
+          return response;
+        },
         btoa: globalThis.btoa.bind(globalThis),
         isOffline,
       };
@@ -202,6 +249,14 @@ export const networkControllerInit: ControllerInitFunction<
       endpointUrl: string;
       error: unknown;
     }) => {
+      if (isUnauthorizedRpcError(error)) {
+        Logger.log('[NETWORK DEBUG] Unauthorized RPC endpoint error (unavailable)', {
+          chainId,
+          endpointUrl,
+          error,
+        });
+      }
+
       onRpcEndpointUnavailable({
         chainId,
         endpointUrl,
@@ -225,6 +280,17 @@ export const networkControllerInit: ControllerInitFunction<
       type,
       retryReason,
     }) => {
+      if (isUnauthorizedRpcError(error)) {
+        Logger.log('[NETWORK DEBUG] Unauthorized RPC endpoint error (degraded)', {
+          chainId,
+          endpointUrl,
+          rpcMethodName,
+          type,
+          retryReason,
+          error,
+        });
+      }
+
       onRpcEndpointDegraded({
         chainId,
         endpointUrl,

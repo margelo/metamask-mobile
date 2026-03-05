@@ -32,6 +32,12 @@ module.exports = {
   },
   plugins: [
     [
+      'expo-dev-client',
+      {
+        launchMode: 'most-recent',
+      },
+    ],
+    [
       'expo-build-properties',
       {
         android: {

@@ -3,6 +3,10 @@ import { getFixturesServerPort } from './framework/fixtures/FixtureUtils';
 import Utilities from './framework/Utilities';
 import { resolveConfig } from 'detox/internals';
 import { createLogger } from './framework/logger';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const logger = createLogger({
   name: 'TestHelpers',
@@ -390,7 +394,10 @@ export default class TestHelpers {
   static async launchApp(launchOptions) {
     const config = await resolveConfig();
     const platform = device.getPlatform();
-    if (config.configurationName.endsWith('debug')) {
+    // CI configurations (ending in '.ci') use release builds without expo-dev-client.
+    // All other configurations use debug builds that require a deep link to connect to Metro.
+    const isReleaseBuild = config.configurationName.endsWith('.ci');
+    if (!isReleaseBuild) {
       return this.launchAppForDebugBuild(platform, launchOptions);
     }
 
@@ -398,20 +405,32 @@ export default class TestHelpers {
   }
 
   static async launchAppForDebugBuild(platform, launchOptions) {
+    if (platform === 'android') {
+      await this.ensureAndroidMetroPortForwarding();
+    }
+
     const deepLinkUrl = this.getDeepLinkUrl(
       this.getDevLauncherPackagerUrl(platform),
     );
+    const launchArgs =
+      platform === 'android'
+        ? {
+            detoxEnableSynchronization: 0,
+            ...(launchOptions?.launchArgs || {}),
+          }
+        : launchOptions?.launchArgs;
 
     if (platform === 'ios') {
-      await device.launchApp(launchOptions);
-      return device.openURL({
+      return device.launchApp({
+        ...launchOptions,
         url: deepLinkUrl,
       });
     }
 
     return device.launchApp({
-      url: deepLinkUrl,
       ...launchOptions,
+      url: deepLinkUrl,
+      launchArgs,
     });
   }
 
@@ -421,7 +440,49 @@ export default class TestHelpers {
     )}`;
   }
 
+  static async ensureAndroidMetroPortForwarding() {
+    const deviceId = device.id || process.env.DETOX_ANDROID_ATTACHED_ADB_NAME;
+    const deviceFlag = deviceId ? `-s ${deviceId}` : '';
+    const metroPort = process.env.METRO_PORT_E2E || '8081';
+    const adbPath = `${
+      process.env.ANDROID_SDK_ROOT || `${process.env.HOME}/Library/Android/sdk`
+    }/platform-tools/adb`;
+
+    try {
+      const command = `${adbPath} ${deviceFlag} reverse tcp:${metroPort} tcp:${metroPort}`;
+      logger.debug('Ensuring Android Metro port forwarding', {
+        command,
+      });
+      const { stdout, stderr } = await execAsync(command);
+
+      if (stdout) {
+        logger.debug(`adb reverse stdout: ${stdout}`);
+      }
+      if (stderr) {
+        logger.warn(`adb reverse stderr: ${stderr}`);
+      }
+    } catch (error) {
+      logger.warn('Failed to set up Android Metro port forwarding', {
+        error,
+      });
+    }
+  }
+
+  static getMetroHost(platform) {
+    if (process.env.METRO_HOST_E2E) {
+      return process.env.METRO_HOST_E2E;
+    }
+
+    if (platform === 'ios' || process.env.CI) {
+      return 'localhost';
+    }
+
+    return 'localhost';
+  }
+
   static getDevLauncherPackagerUrl(platform) {
-    return `http://localhost:8081/index.bundle?platform=${platform}&dev=true&minify=false&disableOnboarding=1`;
+    const host = this.getMetroHost(platform);
+    const port = process.env.METRO_PORT_E2E || '8081';
+    return `http://${host}:${port}?disableOnboarding=1`;
   }
 }
