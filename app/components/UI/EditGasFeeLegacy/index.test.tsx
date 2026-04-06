@@ -1,21 +1,24 @@
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react-native';
+import { ThemeContext, mockTheme } from '../../../util/theme';
 
 import EditGasFeeLegacy from './';
 
 describe('EditGasFeeLegacy', () => {
   it('should render correctly', () => {
-    const wrapper = shallow(
-      <EditGasFeeLegacy
-        gasFee={{
-          maxWaitTimeEstimate: 150000,
-          minWaitTimeEstimate: 0,
-          suggestedGasLimit: '21000',
-          suggestedGasPrice: '10',
-        }}
-        view={''}
-      />,
+    const { toJSON } = render(
+      <ThemeContext.Provider value={mockTheme}>
+        <EditGasFeeLegacy
+          gasFee={{
+            maxWaitTimeEstimate: 150000,
+            minWaitTimeEstimate: 0,
+            suggestedGasLimit: '21000',
+            suggestedGasPrice: '10',
+          }}
+          view={''}
+        />
+      </ThemeContext.Provider>,
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(toJSON()).toMatchSnapshot();
   });
 });

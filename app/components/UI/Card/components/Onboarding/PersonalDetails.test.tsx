@@ -393,7 +393,7 @@ describe('PersonalDetails Component', () => {
       const { getByTestId } = render(<PersonalDetails />);
 
       const continueButton = getByTestId('personal-details-continue-button');
-      expect(continueButton.props.disabled).toBe(true);
+      expect(continueButton).toBeDisabled();
     });
 
     it('does not show error messages initially', () => {
@@ -459,20 +459,24 @@ describe('PersonalDetails Component', () => {
   });
 
   describe('Form Field Interactions', () => {
-    it('allows text input in first name field', () => {
+    it('allows text input in first name field', async () => {
       const { getByTestId } = render(<PersonalDetails />);
 
       const firstNameInput = getByTestId('personal-details-first-name-input');
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
 
       expect(firstNameInput.props.value).toBe('John');
     });
 
-    it('allows text input in last name field', () => {
+    it('allows text input in last name field', async () => {
       const { getByTestId } = render(<PersonalDetails />);
 
       const lastNameInput = getByTestId('personal-details-last-name-input');
+      await act(async () => {
       fireEvent.changeText(lastNameInput, 'Doe');
+    });
 
       expect(lastNameInput.props.value).toBe('Doe');
     });
@@ -512,11 +516,13 @@ describe('PersonalDetails Component', () => {
       });
     });
 
-    it('filters non-numeric characters from SSN input', () => {
+    it('filters non-numeric characters from SSN input', async () => {
       const { getByTestId } = render(<PersonalDetails />);
 
       const ssnInput = getByTestId('personal-details-ssn-input');
+      await act(async () => {
       fireEvent.changeText(ssnInput, 'abc123def456ghi789');
+    });
 
       expect(ssnInput.props.value).toBe('123456789');
     });
@@ -560,18 +566,22 @@ describe('PersonalDetails Component', () => {
       expect(queryByTestId('personal-details-ssn-error')).toBeNull();
     });
 
-    it('clears SSN error when user starts typing again', () => {
+    it('clears SSN error when user starts typing again', async () => {
       const { getByTestId, queryByTestId } = render(<PersonalDetails />);
 
       const ssnInput = getByTestId('personal-details-ssn-input');
 
       // Type invalid SSN and blur to trigger error
+      await act(async () => {
       fireEvent.changeText(ssnInput, '123');
+    });
       fireEvent(ssnInput, 'onBlur');
       expect(getByTestId('personal-details-ssn-error')).toBeTruthy();
 
       // Type again - error should be cleared
+      await act(async () => {
       fireEvent.changeText(ssnInput, '1234');
+    });
       expect(queryByTestId('personal-details-ssn-error')).toBeNull();
     });
   });
@@ -886,17 +896,23 @@ describe('PersonalDetails Component', () => {
       );
       const ssnInput = getByTestId('personal-details-ssn-input');
 
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
+      await act(async () => {
       fireEvent.changeText(lastNameInput, 'Doe');
+    });
       fireEvent.changeText(dateOfBirthInput, '631152000000'); // Valid timestamp for 1990-01-01
       fireEvent.press(nationalitySelect); // Triggers setOnValueChange which sets nationalityKey
+      await act(async () => {
       fireEvent.changeText(ssnInput, '123456789');
+    });
 
       const continueButton = getByTestId('personal-details-continue-button');
 
       await act(async () => {
-        fireEvent.press(continueButton);
-      });
+      fireEvent.press(continueButton);
+    });
 
       expect(mockRegisterPersonalDetails).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -924,23 +940,29 @@ describe('PersonalDetails Component', () => {
       );
       const ssnInput = getByTestId('personal-details-ssn-input');
 
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
+      await act(async () => {
       fireEvent.changeText(lastNameInput, 'Doe');
+    });
       fireEvent.changeText(dateOfBirthInput, '631152000000'); // Valid timestamp for 1990-01-01
       fireEvent.press(nationalitySelect); // Triggers setOnValueChange which sets nationalityKey
+      await act(async () => {
       fireEvent.changeText(ssnInput, '123456789');
+    });
 
       const continueButton = getByTestId('personal-details-continue-button');
 
       await act(async () => {
-        fireEvent.press(continueButton);
-      });
+      fireEvent.press(continueButton);
+    });
 
       expect(mockSetUser).toHaveBeenCalledWith(mockUser);
       expect(mockReset).toHaveBeenCalled();
     });
 
-    it('disables continue button when required fields are missing', () => {
+    it('disables continue button when required fields are missing', async () => {
       // Ensure no user data is pre-populated
       (useCardSDK as jest.Mock).mockReturnValue({
         user: null,
@@ -952,14 +974,16 @@ describe('PersonalDetails Component', () => {
       const { getByTestId } = render(<PersonalDetails />);
 
       const firstNameInput = getByTestId('personal-details-first-name-input');
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
 
       const continueButton = getByTestId('personal-details-continue-button');
 
-      expect(continueButton.props.disabled).toBe(true);
+      expect(continueButton).toBeDisabled();
     });
 
-    it('does not call registerPersonalDetails when onboardingId is missing', () => {
+    it('does not call registerPersonalDetails when onboardingId is missing', async () => {
       (useSelector as jest.Mock).mockImplementation((selector) => {
         const mockState = {
           card: {
@@ -983,12 +1007,20 @@ describe('PersonalDetails Component', () => {
       const lastNameInput = getByTestId('personal-details-last-name-input');
       const ssnInput = getByTestId('personal-details-ssn-input');
 
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
+      await act(async () => {
       fireEvent.changeText(lastNameInput, 'Doe');
+    });
+      await act(async () => {
       fireEvent.changeText(ssnInput, '123456789');
+    });
 
       const continueButton = getByTestId('personal-details-continue-button');
+      await act(async () => {
       fireEvent.press(continueButton);
+    });
 
       expect(mockRegisterPersonalDetails).not.toHaveBeenCalled();
     });
@@ -1012,6 +1044,15 @@ describe('PersonalDetails Component', () => {
     });
 
     it('handles onboarding ID not found error by resetting state', async () => {
+      // Reset useRegisterPersonalDetails to default state (previous test may have set isError)
+      (useRegisterPersonalDetails as jest.Mock).mockReturnValue({
+        registerPersonalDetails: mockRegisterPersonalDetails,
+        isLoading: false,
+        isError: false,
+        error: null,
+        reset: jest.fn(),
+      });
+
       // Setup: Pre-fill all required fields via userData
       const mockUserData = {
         firstName: 'John',
@@ -1035,9 +1076,14 @@ describe('PersonalDetails Component', () => {
 
       const continueButton = getByTestId('personal-details-continue-button');
 
-      await act(async () => {
-        fireEvent.press(continueButton);
+      // Wait for userData effects to populate the form fields
+      await waitFor(() => {
+        expect(continueButton).toBeEnabled();
       });
+
+      await act(async () => {
+      fireEvent.press(continueButton);
+    });
 
       await waitFor(() => {
         expect(mockDispatch).toHaveBeenCalled();
@@ -1045,19 +1091,23 @@ describe('PersonalDetails Component', () => {
       });
     });
 
-    it('disables continue button when SSN is invalid', () => {
+    it('disables continue button when SSN is invalid', async () => {
       const { getByTestId } = render(<PersonalDetails />);
 
       const firstNameInput = getByTestId('personal-details-first-name-input');
       const lastNameInput = getByTestId('personal-details-last-name-input');
       const ssnInput = getByTestId('personal-details-ssn-input');
 
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
+      await act(async () => {
       fireEvent.changeText(lastNameInput, 'Doe');
+    });
       fireEvent.changeText(ssnInput, '123'); // Invalid SSN (less than 9 digits)
 
       const continueButton = getByTestId('personal-details-continue-button');
-      expect(continueButton.props.disabled).toBe(true);
+      expect(continueButton).toBeDisabled();
     });
 
     it('includes dateOfBirth in registration payload when provided', async () => {
@@ -1077,29 +1127,41 @@ describe('PersonalDetails Component', () => {
       );
       const ssnInput = getByTestId('personal-details-ssn-input');
 
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
+      await act(async () => {
       fireEvent.changeText(lastNameInput, 'Doe');
-      fireEvent.changeText(dateOfBirthInput, '631152000000'); // Valid timestamp for 1990-01-01
-      fireEvent.press(nationalitySelect); // Triggers setOnValueChange which sets nationalityKey
+    });
+      await act(async () => {
+      fireEvent.changeText(dateOfBirthInput, '631152000000');
+    }); // Valid timestamp for 1990-01-01
+      await act(async () => {
+      fireEvent.press(nationalitySelect);
+    }); // Triggers setOnValueChange which sets nationalityKey
+      await act(async () => {
       fireEvent.changeText(ssnInput, '123456789');
+    });
 
       const continueButton = getByTestId('personal-details-continue-button');
 
       await act(async () => {
-        fireEvent.press(continueButton);
-      });
-
-      expect(mockRegisterPersonalDetails).toHaveBeenCalledWith(
-        expect.objectContaining({
-          onboardingId: 'test-onboarding-id',
-          firstName: 'John',
-          lastName: 'Doe',
-          dateOfBirth: expect.any(String),
-        }),
-      );
+      fireEvent.press(continueButton);
     });
 
-    it('does not require SSN when country is not US', () => {
+      await waitFor(() => {
+        expect(mockRegisterPersonalDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            onboardingId: 'test-onboarding-id',
+            firstName: 'John',
+            lastName: 'Doe',
+            dateOfBirth: expect.any(String),
+          }),
+        );
+      });
+    });
+
+    it('does not require SSN when country is not US', async () => {
       (useSelector as jest.Mock).mockImplementation((selector) => {
         const mockState = {
           card: {
@@ -1122,8 +1184,12 @@ describe('PersonalDetails Component', () => {
       const firstNameInput = getByTestId('personal-details-first-name-input');
       const lastNameInput = getByTestId('personal-details-last-name-input');
 
+      await act(async () => {
       fireEvent.changeText(firstNameInput, 'John');
+    });
+      await act(async () => {
       fireEvent.changeText(lastNameInput, 'Doe');
+    });
 
       expect(queryByTestId('personal-details-ssn-input')).toBeNull();
     });

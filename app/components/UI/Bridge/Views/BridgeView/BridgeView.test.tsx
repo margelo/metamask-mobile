@@ -331,7 +331,7 @@ describe('BridgeView', () => {
     jest.clearAllMocks();
   });
 
-  it('renders', async () => {
+  it('renders', () => {
     const { toJSON } = renderScreen(
       BridgeView,
       {
@@ -575,7 +575,7 @@ describe('BridgeView', () => {
     });
   });
 
-  it('switch tokens and preserve keypad state when clicking arrow button', () => {
+  it('switch tokens and preserve keypad state when clicking arrow button', async () => {
     const mockStateWithTokens = {
       ...mockState,
       bridge: {
@@ -693,7 +693,7 @@ describe('BridgeView', () => {
     const arrowButton = getByTestId('arrow-button');
 
     // Button should be disabled when dest network is disabled
-    expect(arrowButton.props.disabled).toBe(true);
+    expect(arrowButton).toBeDisabled();
     // When disabled, onPress is set to undefined in FLipQuoteButton
     expect(arrowButton.props.onPress).toBeUndefined();
   });
@@ -1247,7 +1247,7 @@ describe('BridgeView', () => {
       } as BridgeRouteParams;
     });
 
-    it('uses sourceToken from route params when provided', async () => {
+    it('uses sourceToken from route params when provided', () => {
       mockRoute.params.sourceToken = mockDeepLinkSourceToken;
 
       // Update the mock state to include the deep link source token
@@ -1321,7 +1321,7 @@ describe('BridgeView', () => {
       expect(input.props.value).toBe('1,000,000');
     });
 
-    it('uses all deep link params when all are provided', async () => {
+    it('uses all deep link params when all are provided', () => {
       mockRoute.params = {
         ...mockRoute.params,
         sourceToken: mockDeepLinkSourceToken,

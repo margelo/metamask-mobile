@@ -73,7 +73,7 @@ jest.mock('@tanstack/react-query', () => ({
   })),
 }));
 
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor , act } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { useSelector } from 'react-redux';
 import React from 'react';
@@ -842,7 +842,7 @@ describe('CardHome Component', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('renders correctly with privacy mode enabled', async () => {
+  it('renders correctly with privacy mode enabled', () => {
     // Given: privacy mode is enabled
     setupMockSelectors({ privacyMode: true });
 
@@ -982,7 +982,7 @@ describe('CardHome Component', () => {
     });
   });
 
-  it('displays correct priority token information', async () => {
+  it('displays correct priority token information', () => {
     // Given: USDC is the priority token
     // When: component renders with privacy mode off
     render();
@@ -1782,7 +1782,7 @@ describe('CardHome Component', () => {
       );
       expect(addFundsButton).toBeTruthy();
       // Button should have disabled styling applied
-      expect(addFundsButton.props.disabled).toBe(true);
+      expect(addFundsButton).toBeDisabled();
     });
 
     it('enables add funds button when swap is enabled for priority token', () => {
@@ -1797,7 +1797,7 @@ describe('CardHome Component', () => {
         CardHomeSelectors.ADD_FUNDS_BUTTON,
       );
       expect(addFundsButton).toBeTruthy();
-      expect(addFundsButton.props.disabled).toBe(false);
+      expect(addFundsButton).toBeEnabled();
     });
 
     it('applies disabled styling when swap is not enabled', () => {
@@ -1814,7 +1814,7 @@ describe('CardHome Component', () => {
         CardHomeSelectors.ADD_FUNDS_BUTTON,
       );
       expect(addFundsButton).toBeTruthy();
-      expect(addFundsButton.props.disabled).toBe(true);
+      expect(addFundsButton).toBeDisabled();
     });
 
     it('does not disable button when swap is enabled for priority token', async () => {
@@ -1828,7 +1828,7 @@ describe('CardHome Component', () => {
       const addFundsButton = screen.getByTestId(
         CardHomeSelectors.ADD_FUNDS_BUTTON,
       );
-      expect(addFundsButton.props.disabled).toBe(false);
+      expect(addFundsButton).toBeEnabled();
 
       mockTrackEvent.mockClear();
       fireEvent.press(addFundsButton);
@@ -1853,7 +1853,7 @@ describe('CardHome Component', () => {
       ).toBeTruthy();
     });
 
-    it('navigates to welcome when change asset pressed and not authenticated', () => {
+    it('navigates to welcome when change asset pressed and not authenticated', async () => {
       // Given: user is not authenticated
       setupMockSelectors({ isAuthenticated: false });
 
@@ -1868,7 +1868,7 @@ describe('CardHome Component', () => {
       expect(mockNavigate).toHaveBeenCalledWith(Routes.CARD.WELCOME);
     });
 
-    it('navigates to asset selection modal when change asset pressed and authenticated', () => {
+    it('navigates to asset selection modal when change asset pressed and authenticated', async () => {
       // Given: user is authenticated
       setupMockSelectors({ isAuthenticated: true });
       setupLoadCardDataMock({ isAuthenticated: true });
@@ -1903,7 +1903,7 @@ describe('CardHome Component', () => {
       ).toBeTruthy();
     });
 
-    it('navigates to welcome when manage spending limit pressed and not authenticated', () => {
+    it('navigates to welcome when manage spending limit pressed and not authenticated', async () => {
       // Given: user is not authenticated
       setupMockSelectors({ isAuthenticated: false });
 
@@ -1930,7 +1930,7 @@ describe('CardHome Component', () => {
       expect(screen.getByText('Logout')).toBeTruthy();
     });
 
-    it('shows logout confirmation alert when logout button pressed', () => {
+    it('shows logout confirmation alert when logout button pressed', async () => {
       // Given: user is authenticated
       setupMockSelectors({ isAuthenticated: true });
       setupLoadCardDataMock({ isAuthenticated: true });
@@ -1956,7 +1956,7 @@ describe('CardHome Component', () => {
       );
     });
 
-    it('calls logout and navigates back when logout confirmed', () => {
+    it('calls logout and navigates back when logout confirmed', async () => {
       // Given: user is authenticated
       setupMockSelectors({ isAuthenticated: true });
       setupLoadCardDataMock({ isAuthenticated: true });
@@ -1972,7 +1972,7 @@ describe('CardHome Component', () => {
       expect(mockGoBack).toHaveBeenCalled();
     });
 
-    it('does not logout when alert is cancelled', () => {
+    it('does not logout when alert is cancelled', async () => {
       // Given: user is authenticated and Alert will be cancelled
       setupMockSelectors({ isAuthenticated: true });
       setupLoadCardDataMock({ isAuthenticated: true });
@@ -4871,7 +4871,7 @@ describe('CardHome Component', () => {
         render();
 
         const toggle = screen.getByTestId(CardHomeSelectors.FREEZE_CARD_TOGGLE);
-        expect(toggle.props.disabled).toBe(true);
+        expect(toggle).toHaveProp('disabled', true);
       });
     });
   });

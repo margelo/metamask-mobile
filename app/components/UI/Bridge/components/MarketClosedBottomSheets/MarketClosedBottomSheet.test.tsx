@@ -17,11 +17,22 @@ jest.mock('@react-navigation/native', () => {
   };
 });
 
-jest.mock('react-native/Libraries/Linking/Linking', () => ({
-  openURL: jest.fn(() => Promise.resolve()),
-  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
-  removeEventListener: jest.fn(),
-}));
+jest.mock(
+  '../../../../../component-library/components/BottomSheets/BottomSheet',
+  () => {
+    const ReactMock = require('react');
+    const MockBottomSheet = ReactMock.forwardRef(
+      ({ children }: { children: React.ReactNode }, _ref: React.Ref<unknown>) => (
+        <>{children}</>
+      ),
+    );
+    MockBottomSheet.displayName = 'MockBottomSheet';
+    return {
+      __esModule: true,
+      default: MockBottomSheet,
+    };
+  },
+);
 
 const mockUseNavigation = useNavigation as jest.MockedFunction<
   typeof useNavigation

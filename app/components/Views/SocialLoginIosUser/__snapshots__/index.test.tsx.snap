@@ -60,6 +60,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
           cacheComposition={true}
           colorFilters={[]}
           enableMergePathsAndroidForKitKatAndAbove={false}
+          enableSafeModeAndroid={false}
           loop={true}
           onAnimationFailure={[Function]}
           onAnimationFinish={[Function]}
@@ -84,7 +85,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
         accessibilityRole="text"
         style={
           {
-            "color": "#131416",
+            "color": "#121314",
             "fontFamily": "Geist-Bold",
             "fontSize": 32,
             "letterSpacing": 0,
@@ -106,22 +107,45 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
         }
       }
     >
-      <TouchableOpacity
+      <View
         accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
         accessible={true}
-        activeOpacity={1}
-        onPress={[Function]}
-        onPressIn={[Function]}
-        onPressOut={[Function]}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
         style={
           {
             "alignItems": "center",
             "alignSelf": "stretch",
-            "backgroundColor": "#131416",
+            "backgroundColor": "#121314",
             "borderRadius": 12,
             "flexDirection": "row",
             "height": 48,
             "justifyContent": "center",
+            "opacity": 1,
             "overflow": "hidden",
             "paddingHorizontal": 16,
           }
@@ -142,7 +166,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
         >
           Unlock wallet
         </Text>
-      </TouchableOpacity>
+      </View>
     </View>
   </View>
 </RNCSafeAreaView>
@@ -208,6 +232,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
           cacheComposition={true}
           colorFilters={[]}
           enableMergePathsAndroidForKitKatAndAbove={false}
+          enableSafeModeAndroid={false}
           loop={true}
           onAnimationFailure={[Function]}
           onAnimationFinish={[Function]}
@@ -232,7 +257,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
         accessibilityRole="text"
         style={
           {
-            "color": "#131416",
+            "color": "#121314",
             "fontFamily": "Geist-Bold",
             "fontSize": 32,
             "letterSpacing": 0,
@@ -254,22 +279,45 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
         }
       }
     >
-      <TouchableOpacity
+      <View
         accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
         accessible={true}
-        activeOpacity={1}
-        onPress={[Function]}
-        onPressIn={[Function]}
-        onPressOut={[Function]}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
         style={
           {
             "alignItems": "center",
             "alignSelf": "stretch",
-            "backgroundColor": "#131416",
+            "backgroundColor": "#121314",
             "borderRadius": 12,
             "flexDirection": "row",
             "height": 40,
             "justifyContent": "center",
+            "opacity": 1,
             "overflow": "hidden",
             "paddingHorizontal": 16,
           }
@@ -290,7 +338,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessExistingUser renders match snapsho
         >
           Unlock wallet
         </Text>
-      </TouchableOpacity>
+      </View>
     </View>
   </View>
 </RNCSafeAreaView>
@@ -356,6 +404,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot 1`]
           cacheComposition={true}
           colorFilters={[]}
           enableMergePathsAndroidForKitKatAndAbove={false}
+          enableSafeModeAndroid={false}
           loop={true}
           onAnimationFailure={[Function]}
           onAnimationFinish={[Function]}
@@ -380,7 +429,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot 1`]
         accessibilityRole="text"
         style={
           {
-            "color": "#131416",
+            "color": "#121314",
             "fontFamily": "Geist-Bold",
             "fontSize": 32,
             "letterSpacing": 0,
@@ -402,22 +451,45 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot 1`]
         }
       }
     >
-      <TouchableOpacity
+      <View
         accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
         accessible={true}
-        activeOpacity={1}
-        onPress={[Function]}
-        onPressIn={[Function]}
-        onPressOut={[Function]}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
         style={
           {
             "alignItems": "center",
             "alignSelf": "stretch",
-            "backgroundColor": "#131416",
+            "backgroundColor": "#121314",
             "borderRadius": 12,
             "flexDirection": "row",
             "height": 48,
             "justifyContent": "center",
+            "opacity": 1,
             "overflow": "hidden",
             "paddingHorizontal": 16,
           }
@@ -438,7 +510,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot 1`]
         >
           Secure your wallet
         </Text>
-      </TouchableOpacity>
+      </View>
     </View>
   </View>
 </RNCSafeAreaView>
@@ -504,6 +576,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot wit
           cacheComposition={true}
           colorFilters={[]}
           enableMergePathsAndroidForKitKatAndAbove={false}
+          enableSafeModeAndroid={false}
           loop={true}
           onAnimationFailure={[Function]}
           onAnimationFinish={[Function]}
@@ -528,7 +601,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot wit
         accessibilityRole="text"
         style={
           {
-            "color": "#131416",
+            "color": "#121314",
             "fontFamily": "Geist-Bold",
             "fontSize": 32,
             "letterSpacing": 0,
@@ -550,22 +623,45 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot wit
         }
       }
     >
-      <TouchableOpacity
+      <View
         accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
         accessible={true}
-        activeOpacity={1}
-        onPress={[Function]}
-        onPressIn={[Function]}
-        onPressOut={[Function]}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
         style={
           {
             "alignItems": "center",
             "alignSelf": "stretch",
-            "backgroundColor": "#131416",
+            "backgroundColor": "#121314",
             "borderRadius": 12,
             "flexDirection": "row",
             "height": 40,
             "justifyContent": "center",
+            "opacity": 1,
             "overflow": "hidden",
             "paddingHorizontal": 16,
           }
@@ -586,7 +682,7 @@ exports[`SocialLoginIosUser SocialLoginSuccessNewUser renders match snapshot wit
         >
           Secure your wallet
         </Text>
-      </TouchableOpacity>
+      </View>
     </View>
   </View>
 </RNCSafeAreaView>

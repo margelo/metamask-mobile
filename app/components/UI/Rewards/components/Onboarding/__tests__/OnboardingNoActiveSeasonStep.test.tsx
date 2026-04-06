@@ -1,5 +1,5 @@
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react-native';
+import { screen, fireEvent , act } from '@testing-library/react-native';
 import { Linking } from 'react-native';
 import { renderWithProviders, createMockDispatch } from '../testUtils';
 import OnboardingNoActiveSeasonStep from '../OnboardingNoActiveSeasonStep';
@@ -517,7 +517,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       );
 
       const nextButton = screen.getByTestId('next-button');
-      expect(nextButton.props.disabled).toBe(true);
+      expect(nextButton).toHaveProp('disabled', true);
     });
 
     it('enables next button when subscriptionId does not exist', () => {
@@ -535,7 +535,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       );
 
       const nextButton = screen.getByTestId('next-button');
-      expect(nextButton.props.disabled).toBe(false);
+      expect(nextButton).toBeEnabled();
     });
 
     it('disables next button when optin is loading', () => {
@@ -546,7 +546,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       );
 
       const nextButton = screen.getByTestId('next-button');
-      expect(nextButton.props.disabled).toBe(true);
+      expect(nextButton).toHaveProp('disabled', true);
     });
 
     it('disables next button when geoLoading is true', () => {
@@ -560,7 +560,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       );
 
       const nextButton = screen.getByTestId('next-button');
-      expect(nextButton.props.disabled).toBe(true);
+      expect(nextButton).toHaveProp('disabled', true);
     });
 
     it('disables next button when both optinLoading and geoLoading are true', () => {
@@ -574,7 +574,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       );
 
       const nextButton = screen.getByTestId('next-button');
-      expect(nextButton.props.disabled).toBe(true);
+      expect(nextButton).toHaveProp('disabled', true);
     });
   });
 
@@ -624,7 +624,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       ).toBeDefined();
     });
 
-    it('opens terms of use URL when link is pressed', () => {
+    it('opens terms of use URL when link is pressed', async () => {
       const mockOpenURL = jest.spyOn(Linking, 'openURL');
 
       renderWithProviders(
@@ -637,7 +637,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       expect(mockOpenURL).toHaveBeenCalledWith(REWARDS_ONBOARD_TERMS_URL);
     });
 
-    it('opens learn more URL when link is pressed', () => {
+    it('opens learn more URL when link is pressed', async () => {
       const mockOpenURL = jest.spyOn(Linking, 'openURL');
 
       renderWithProviders(
@@ -654,7 +654,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
   });
 
   describe('next button interaction', () => {
-    it('calls optin with bulkLink false when next button is pressed and checkbox is unchecked', () => {
+    it('calls optin with bulkLink false when next button is pressed and checkbox is unchecked', async () => {
       mockCanContinue.mockReturnValue(true);
 
       renderWithProviders(
@@ -668,7 +668,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       expect(mockOptin).toHaveBeenCalledWith({ bulkLink: false });
     });
 
-    it('calls optin with bulkLink true when checkbox is checked before pressing next', () => {
+    it('calls optin with bulkLink true when checkbox is checked before pressing next', async () => {
       mockCanContinue.mockReturnValue(true);
 
       renderWithProviders(
@@ -687,7 +687,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       expect(mockOptin).toHaveBeenCalledWith({ bulkLink: true });
     });
 
-    it('does not call optin when canContinue returns false', () => {
+    it('does not call optin when canContinue returns false', async () => {
       mockCanContinue.mockReturnValue(false);
 
       renderWithProviders(
@@ -720,7 +720,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       expect(checkedState.props.children).toBe('unchecked');
     });
 
-    it('toggles checkbox state when pressed', () => {
+    it('toggles checkbox state when pressed', async () => {
       renderWithProviders(
         <OnboardingNoActiveSeasonStep canContinue={mockCanContinue} />,
       );
@@ -732,7 +732,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       expect(checkedState.props.children).toBe('checked');
     });
 
-    it('toggles checkbox back to unchecked when pressed twice', () => {
+    it('toggles checkbox back to unchecked when pressed twice', async () => {
       renderWithProviders(
         <OnboardingNoActiveSeasonStep canContinue={mockCanContinue} />,
       );
@@ -753,7 +753,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       );
 
       const checkbox = screen.getByTestId('bulk-link-checkbox');
-      expect(checkbox.props.accessibilityState.disabled).toBe(true);
+      expect(checkbox).toBeDisabled();
     });
 
     it('enables checkbox when optinLoading is false', () => {
@@ -764,7 +764,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
       );
 
       const checkbox = screen.getByTestId('bulk-link-checkbox');
-      expect(checkbox.props.accessibilityState.disabled).toBe(false);
+      expect(checkbox).toBeEnabled();
     });
 
     it('renders checkbox with correct label text', () => {
@@ -845,7 +845,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
   });
 
   describe('edge cases', () => {
-    it('handles canContinue callback being called multiple times', () => {
+    it('handles canContinue callback being called multiple times', async () => {
       mockCanContinue.mockReturnValue(true);
 
       renderWithProviders(
@@ -891,7 +891,7 @@ describe('OnboardingNoActiveSeasonStep', () => {
 
       const nextButton = screen.getByTestId('next-button');
       // Button should be disabled when subscriptionId exists
-      expect(nextButton.props.disabled).toBe(true);
+      expect(nextButton).toHaveProp('disabled', true);
     });
   });
 });

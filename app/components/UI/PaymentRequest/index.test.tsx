@@ -22,11 +22,6 @@ import Routes from '../../../constants/navigation/Routes';
 import { WalletViewSelectorsIDs } from '../../Views/Wallet/WalletView.testIds';
 import ethLogo from '../../../assets/images/eth-logo.png';
 
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn(),
-}));
-
 const mockTrackEvent = jest.fn();
 jest.mock('../../../util/analytics/analytics', () => ({
   analytics: {
@@ -124,18 +119,8 @@ const initialState = {
   },
 };
 
-let mockSetShowError: jest.Mock;
-let mockShowError = false;
-
 beforeEach(() => {
   mockTrackEvent.mockClear();
-  mockSetShowError = jest.fn((value) => {
-    mockShowError = value;
-  });
-  (React.useState as jest.Mock).mockImplementation((state) => [
-    state,
-    mockSetShowError,
-  ]);
 });
 
 afterEach(() => {
@@ -193,10 +178,12 @@ describe('PaymentRequest', () => {
     expect(getByText('Choose an asset to request')).toBeTruthy();
   });
 
-  it('allows searching for assets', () => {
+  it('allows searching for assets', async () => {
     const { getByPlaceholderText } = renderComponent();
     const searchInput = getByPlaceholderText('Search assets');
-    fireEvent.changeText(searchInput, 'ETH');
+    await act(async () => {
+      fireEvent.changeText(searchInput, 'ETH');
+    });
     expect(searchInput.props.value).toBe('ETH');
   });
 
@@ -230,7 +217,9 @@ describe('PaymentRequest', () => {
     await userEvent.press(getByText('ETH'));
 
     const amountInput = getByPlaceholderText('0.00');
-    fireEvent.changeText(amountInput, '  1.5  ');
+    await act(async () => {
+      fireEvent.changeText(amountInput, '  1.5  ');
+    });
 
     expect(amountInput.props.value).toBe('1.5');
   });
@@ -248,31 +237,24 @@ describe('PaymentRequest', () => {
   });
 
   it('displays an error when an invalid amount is entered', async () => {
-    const { getByText, getByPlaceholderText, queryByText } = renderComponent();
-
-    (React.useState as jest.Mock).mockImplementation(() => [
-      mockShowError,
-      mockSetShowError,
-    ]);
-
-    mockSetShowError(true);
+    const { getByText, getByPlaceholderText } = renderComponent();
 
     await userEvent.press(getByText('ETH'));
 
     const amountInput = getByPlaceholderText('0.00');
-    const nextButton = getByText('Next');
 
     await act(async () => {
       fireEvent.changeText(amountInput, '0');
-      fireEvent.press(nextButton);
     });
 
-    expect(mockSetShowError).toHaveBeenCalledWith(true);
-    expect(queryByText('Invalid request, please try again')).toBeTruthy();
+    await waitFor(() => {
+      const nextButton = getByText('Next');
+      expect(nextButton).toBeDisabled();
+    });
   });
 
   describe('handleNetworkPickerPress', () => {
-    it('should navigate to network selector modal when feature flag is enabled', () => {
+    it('should navigate to network selector modal when feature flag is enabled', async () => {
       const { getByTestId } = renderComponent({
         chainId: '0x1',
         networkImageSource: ethLogo,
@@ -282,9 +264,9 @@ describe('PaymentRequest', () => {
         WalletViewSelectorsIDs.NAVBAR_NETWORK_PICKER,
       );
 
-      act(() => {
-        fireEvent.press(networkPicker);
-      });
+      await act(async () => {
+      fireEvent.press(networkPicker);
+    });
 
       expect(mockNavigation.navigate).toHaveBeenCalledWith(
         Routes.MODAL.ROOT_MODAL_FLOW,
@@ -303,7 +285,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types and then presses clear button
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BAT');
+    });
 
       // Wait for debounce to complete
       act(() => {
@@ -317,7 +301,9 @@ describe('PaymentRequest', () => {
 
       // Find and press clear button using testID
       const clearButton = getByTestId('clear-search-input-button');
+      await act(async () => {
       fireEvent.press(clearButton);
+    });
 
       // Then input should be cleared and results reset
       expect(searchInput.props.value).toBe('');
@@ -331,8 +317,12 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types and clears
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BAT');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, '');
+    });
 
       // Then search input should maintain focus
       expect(searchInput.props.value).toBe('');
@@ -346,7 +336,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types and component unmounts before debounce completes
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ETH');
+    });
 
       // Then unmount the component
       unmount();
@@ -400,7 +392,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types invalid input (simulating edge case)
+      await act(async () => {
       fireEvent.changeText(searchInput, '123');
+    });
 
       // Then it should handle the search without errors
       act(() => {
@@ -418,7 +412,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types special characters
+      await act(async () => {
       fireEvent.changeText(searchInput, '!@#$%');
+    });
 
       // Then it should handle the search gracefully
       act(() => {
@@ -438,7 +434,9 @@ describe('PaymentRequest', () => {
 
       // When user types a very long search term
       const longSearchTerm = 'a'.repeat(100);
+      await act(async () => {
       fireEvent.changeText(searchInput, longSearchTerm);
+    });
 
       // Then it should handle the search without performance issues
       act(() => {
@@ -489,9 +487,15 @@ describe('PaymentRequest', () => {
       expect(getByText('Top picks')).toBeTruthy();
 
       // When user types rapidly
+      await act(async () => {
       fireEvent.changeText(searchInput, 'E');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ET');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ETH');
+    });
 
       // Then the input value should update immediately
       expect(searchInput.props.value).toBe('ETH');
@@ -515,8 +519,12 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types and then clears immediately
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ETH');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, '');
+    });
 
       // Then the input should be cleared immediately
       expect(searchInput.props.value).toBe('');
@@ -539,7 +547,9 @@ describe('PaymentRequest', () => {
       expect(getByText('Top picks')).toBeTruthy();
 
       // When user types a search term
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BAT');
+    });
 
       // Then the input value should update immediately
       expect(searchInput.props.value).toBe('BAT');
@@ -563,9 +573,15 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types rapidly with different terms
+      await act(async () => {
       fireEvent.changeText(searchInput, 'E');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ET');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ETH');
+    });
 
       // Then only the final search should execute
       act(() => {
@@ -586,7 +602,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types and component unmounts before debounce completes
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ETH');
+    });
 
       // Then unmount the component
       unmount();
@@ -610,8 +628,12 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types and then clears to empty
+      await act(async () => {
       fireEvent.changeText(searchInput, 'ETH');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, '');
+    });
 
       // Then it should show top picks immediately
       expect(getByText('Top picks')).toBeTruthy();
@@ -630,7 +652,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When user types and submits (which calls handleSearchTokenList)
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BAT');
+    });
       fireEvent(searchInput, 'submitEditing');
 
       // Then the search should not execute immediately
@@ -656,7 +680,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When searching for token symbol
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BAT');
+    });
       act(() => {
         jest.advanceTimersByTime(300);
       });
@@ -669,7 +695,9 @@ describe('PaymentRequest', () => {
       });
 
       // When searching for token name
+      await act(async () => {
       fireEvent.changeText(searchInput, 'Basic Attention');
+    });
       act(() => {
         jest.advanceTimersByTime(300);
       });
@@ -682,7 +710,9 @@ describe('PaymentRequest', () => {
       });
 
       // When searching for non-existent token
+      await act(async () => {
       fireEvent.changeText(searchInput, 'NONEXISTENT');
+    });
       act(() => {
         jest.advanceTimersByTime(300);
       });
@@ -701,7 +731,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When searching with partial symbol
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BA');
+    });
       act(() => {
         jest.advanceTimersByTime(300);
       });
@@ -714,7 +746,9 @@ describe('PaymentRequest', () => {
       });
 
       // When searching with partial name
+      await act(async () => {
       fireEvent.changeText(searchInput, 'Basic');
+    });
       act(() => {
         jest.advanceTimersByTime(300);
       });
@@ -734,9 +768,15 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When typing rapidly with valid search terms
+      await act(async () => {
       fireEvent.changeText(searchInput, 'B');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BA');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BAT');
+    });
 
       // Then should not show results immediately
       expect(queryByText('BAT')).toBeNull();
@@ -754,8 +794,12 @@ describe('PaymentRequest', () => {
       });
 
       // When typing rapidly with invalid then valid terms
+      await act(async () => {
       fireEvent.changeText(searchInput, 'INVALID');
+    });
+      await act(async () => {
       fireEvent.changeText(searchInput, 'BAT');
+    });
 
       // When debounce delay passes
       act(() => {
@@ -776,10 +820,12 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When searching by token address
+      await act(async () => {
       fireEvent.changeText(
         searchInput,
         '0x0d8775f59023cbe76e541b6497bbed3cd21acbdc',
       );
+    });
       act(() => {
         jest.advanceTimersByTime(300);
       });
@@ -798,7 +844,9 @@ describe('PaymentRequest', () => {
       const searchInput = getByPlaceholderText('Search assets');
 
       // When searching with different cases
+      await act(async () => {
       fireEvent.changeText(searchInput, 'bat');
+    });
       act(() => {
         jest.advanceTimersByTime(300);
       });

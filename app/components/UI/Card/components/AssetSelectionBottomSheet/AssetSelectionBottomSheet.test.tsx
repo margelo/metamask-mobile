@@ -92,6 +92,28 @@ jest.mock('../../hooks/useUpdateTokenPriority', () => ({
 
 jest.mock('../../../../../util/Logger');
 
+jest.mock(
+  '../../../../../component-library/components/BottomSheets/BottomSheet',
+  () => {
+    const ReactMock = require('react');
+    const MockBottomSheet = ReactMock.forwardRef(
+      ({ children }: { children: React.ReactNode }, ref: React.Ref<unknown>) => {
+        ReactMock.useImperativeHandle(ref, () => ({
+          onCloseBottomSheet: (callback?: () => void) => {
+            callback?.();
+          },
+        }));
+        return <>{children}</>;
+      },
+    );
+    MockBottomSheet.displayName = 'MockBottomSheet';
+    return {
+      __esModule: true,
+      default: MockBottomSheet,
+    };
+  },
+);
+
 // Create a mock tailwind function that can be called and has a style method
 const mockTw = Object.assign(
   jest.fn((className: string) => ({ className })),

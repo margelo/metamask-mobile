@@ -37,7 +37,13 @@ const config = {
     '^.+\\.(png|jpg|jpeg|gif|webp|svg|mp4|riv)$':
       '<rootDir>/app/util/test/assetFileTransformer.js',
   },
-  snapshotSerializers: ['enzyme-to-json/serializer'],
+  snapshotSerializers: [],
+  snapshotFormat: {
+    // Prevent pretty-format from recursing infinitely into deeply nested
+    // objects (e.g. Reanimated shared values with circular refs, React fiber
+    // nodes). The default is Infinity which causes RangeError: Invalid string length.
+    maxDepth: 15,
+  },
   // Disable coverage collection for Reassure runs to avoid OOM
   collectCoverage: !isReassureRun && process.env.NODE_ENV !== 'production',
   collectCoverageFrom: !isReassureRun
@@ -51,7 +57,7 @@ const config = {
     '<rootDir>/app/features/SampleFeature/e2e/',
   ],
   testPathIgnorePatterns: [
-    '.*/tests/(smoke|regression)/.*\\.spec\\.(ts|js)$',
+    '.*/tests/(smoke|regression|performance)/.*\\.spec\\.(ts|tsx|js)$',
     '.*/e2e/.*\\.spec\\.(ts|js)$',
     '.*/e2e/pages/',
     '.*/e2e/selectors/',

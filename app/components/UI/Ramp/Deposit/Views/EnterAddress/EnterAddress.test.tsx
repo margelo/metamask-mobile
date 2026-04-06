@@ -91,7 +91,7 @@ function render(Component: React.ComponentType) {
   );
 }
 
-function fillFormAndSubmit({
+async function fillFormAndSubmit({
   addressLine1 = '123 Main St',
   addressLine2 = '',
   city = 'San Francisco',
@@ -161,9 +161,11 @@ describe('EnterAddress Component', () => {
 
     render(EnterAddress);
 
-    fillFormAndSubmit();
+    await fillFormAndSubmit();
 
-    expect(mockKycFunction).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockKycFunction).toHaveBeenCalled();
+    });
 
     await waitFor(() => {
       expect(mockRouteAfterAuthentication).not.toHaveBeenCalled();
@@ -180,12 +182,12 @@ describe('EnterAddress Component', () => {
     );
   });
 
-  it('disables the continue button when loading is true', () => {
+  it('disables the continue button when loading is true', async () => {
     render(EnterAddress);
     const button = screen.getByTestId('address-continue-button');
-    expect(button.props.disabled).toBe(false);
+    expect(button).toBeEnabled();
 
-    fillFormAndSubmit();
+    await fillFormAndSubmit();
 
     mockKycFunction.mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100)),
@@ -193,7 +195,7 @@ describe('EnterAddress Component', () => {
 
     fireEvent.press(button);
 
-    expect(button.props.disabled).toBe(true);
+    expect(button).toBeDisabled();
   });
 
   it('shows text input for state when region is not US', () => {
@@ -205,23 +207,22 @@ describe('EnterAddress Component', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('validates address line 2 when provided', () => {
+  it('validates address line 2 when provided', async () => {
     render(EnterAddress);
 
-    fillFormAndSubmit();
+    // Fill the form with an invalid address line 2 directly (don't submit valid first)
+    await fillFormAndSubmit({ addressLine2: '12345' });
 
-    fireEvent.changeText(screen.getByTestId('address-line-2-input'), '12345');
-
-    fireEvent.press(screen.getByTestId('address-continue-button'));
-
-    expect(screen.getByText('Please enter a valid address')).toBeOnTheScreen();
+    await waitFor(() => {
+      expect(screen.getByText('Please enter a valid address')).toBeOnTheScreen();
+    });
     expect(mockRouteAfterAuthentication).not.toHaveBeenCalled();
   });
 
   it('accepts valid address line 2', async () => {
     render(EnterAddress);
 
-    fillFormAndSubmit({ addressLine2: 'Apt 4B' });
+    await fillFormAndSubmit({ addressLine2: 'Apt 4B' });
 
     await waitFor(() => {
       expect(mockRouteAfterAuthentication).toHaveBeenCalledWith(mockQuote);
@@ -248,13 +249,13 @@ describe('EnterAddress Component', () => {
     render(EnterAddress);
     const countryInput = screen.getByTestId('country-input');
     expect(countryInput.props.value).toBe('United States');
-    expect(countryInput.props.editable).toBe(false);
+    expect(countryInput).toHaveProp('editable', false);
   });
 
   it('calls required SDK methods with address data only', async () => {
     render(EnterAddress);
 
-    fillFormAndSubmit();
+    await fillFormAndSubmit();
 
     await waitFor(() => {
       expect(mockKycFunction).toHaveBeenCalledWith({
@@ -273,7 +274,7 @@ describe('EnterAddress Component', () => {
   it('tracks analytics event when continue button is pressed with valid form data', async () => {
     render(EnterAddress);
 
-    fillFormAndSubmit();
+    await fillFormAndSubmit();
 
     expect(mockTrackEvent).toHaveBeenCalledWith('RAMPS_ADDRESS_ENTERED', {
       region: 'US',

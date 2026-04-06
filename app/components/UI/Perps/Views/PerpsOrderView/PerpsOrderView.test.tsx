@@ -11,20 +11,12 @@ import { TouchableOpacity } from 'react-native';
 import { Text } from '@metamask/design-system-react-native';
 import { SafeAreaProvider, Metrics } from 'react-native-safe-area-context';
 
-// Mock react-native-reanimated before importing components
+// Local reanimated mock needed: Reanimated.default.call override is required
+// for RewardsAnimations component rendering.
 jest.mock('react-native-reanimated', () => {
   const Reanimated = jest.requireActual('react-native-reanimated/mock');
-  Reanimated.default.call = () => {
-    // Mock implementation
-  };
-  return {
-    ...Reanimated,
-    configureReanimatedLogger: jest.fn(),
-    ReanimatedLogLevel: {
-      warn: 1,
-      error: 2,
-    },
-  };
+  Reanimated.default.call = () => {};
+  return Reanimated;
 });
 
 // Mock react-native-gesture-handler
@@ -1036,7 +1028,7 @@ describe('PerpsOrderView', () => {
     });
   });
 
-  it('handles amount display', async () => {
+  it('handles amount display', () => {
     const { getByTestId } = render(<PerpsOrderView />, {
       wrapper: TestWrapper,
     });
@@ -1047,7 +1039,7 @@ describe('PerpsOrderView', () => {
     expect(getByTestId).toBeDefined();
   });
 
-  it('handles successful order placement', async () => {
+  it('handles successful order placement', () => {
     const mockPlaceOrder = jest.fn().mockResolvedValue({ success: true });
     const mockGetPositions = jest
       .fn()
@@ -1130,7 +1122,7 @@ describe('PerpsOrderView', () => {
     expect(mockSubmitted).not.toHaveBeenCalled();
   });
 
-  it('handles failed order placement', async () => {
+  it('handles failed order placement', () => {
     const mockPlaceOrder = jest.fn().mockResolvedValue({
       success: false,
       error: 'Insufficient balance',
@@ -1161,7 +1153,7 @@ describe('PerpsOrderView', () => {
     });
   });
 
-  it('shows order type bottom sheet when order type pressed', async () => {
+  it('shows order type bottom sheet when order type pressed', () => {
     render(<PerpsOrderView />, { wrapper: TestWrapper });
 
     // Since PerpsOrderHeader is mocked, we need to test differently
@@ -1169,7 +1161,7 @@ describe('PerpsOrderView', () => {
     expect(screen.getByTestId('perps-order-header')).toBeDefined();
   });
 
-  it('handles keypad input', async () => {
+  it('handles keypad input', () => {
     render(<PerpsOrderView />, { wrapper: TestWrapper });
 
     // Press on amount display to activate keypad
@@ -1221,7 +1213,7 @@ describe('PerpsOrderView', () => {
     expect(mockTrackEvent).toHaveBeenCalled();
   });
 
-  it('shows slider when not focused on input', async () => {
+  it('shows slider when not focused on input', () => {
     render(<PerpsOrderView />, { wrapper: TestWrapper });
 
     // Slider should be visible initially
@@ -1252,7 +1244,7 @@ describe('PerpsOrderView', () => {
     });
   });
 
-  it('shows limit price bottom sheet for limit orders', async () => {
+  it('shows limit price bottom sheet for limit orders', () => {
     render(<PerpsOrderView />, { wrapper: TestWrapper });
 
     // Limit price is only shown for limit orders, skip this test for market orders
@@ -1621,7 +1613,7 @@ describe('PerpsOrderView', () => {
         PerpsOrderViewSelectorsIDs.PLACE_ORDER_BUTTON,
       );
       expect(placeOrderButton).toBeDefined();
-      expect(placeOrderButton.props.accessibilityState?.disabled).toBeFalsy();
+      expect(placeOrderButton).toBeEnabled();
     });
   });
 
@@ -1966,7 +1958,7 @@ describe('PerpsOrderView', () => {
       );
 
       // Verify the button is disabled due to liquidation risk
-      expect(placeOrderButton.props.accessibilityState?.disabled).toBeTruthy();
+      expect(placeOrderButton).toBeDisabled();
     });
   });
 
@@ -3013,7 +3005,7 @@ describe('PerpsOrderView', () => {
       expect(screen.getByText('5x')).toBeDefined();
     });
 
-    it('should prioritize existing position leverage over saved config (bug fix)', async () => {
+    it('should prioritize existing position leverage over saved config (bug fix)', () => {
       // This test verifies the fix for the leverage priority chain bug
       // Scenario: User has saved config at 5x, but existing position at 10x
       // Expected: Form should initialize with 10x (not 5x)
@@ -3158,7 +3150,7 @@ describe('PerpsOrderView', () => {
       });
     });
 
-    it('should show points tooltip when points info icon is pressed', async () => {
+    it('should show points tooltip when points info icon is pressed', () => {
       // Arrange - Mock rewards to be enabled and showing
       (usePerpsRewards as jest.Mock).mockReturnValue({
         shouldShowRewardsRow: true,
@@ -3189,7 +3181,7 @@ describe('PerpsOrderView', () => {
   });
 
   describe('Insufficient funds handling', () => {
-    it('should not show balance warning when account is still loading', async () => {
+    it('should not show balance warning when account is still loading', () => {
       // This test verifies our loading guard fix - balance warnings shouldn't
       // appear while account data is still loading
       (usePerpsLiveAccount as jest.Mock).mockReturnValue({
@@ -3264,7 +3256,7 @@ describe('PerpsOrderView', () => {
   });
 
   describe('Order header interactions', () => {
-    it('should open order type bottom sheet when order type is pressed in header', async () => {
+    it('should open order type bottom sheet when order type is pressed in header', () => {
       const { getByText } = render(
         <SafeAreaProvider initialMetrics={initialMetrics}>
           <TestWrapper>

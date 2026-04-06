@@ -320,11 +320,14 @@ jest.mock('../../../../../images/image-icons', () => ({
   HL: 'mock-hl-image',
 }));
 
-jest.mock('@metamask/design-system-twrnc-preset', () => ({
-  useTailwind: () => ({
-    style: jest.fn(() => ({})),
-  }),
-}));
+jest.mock('@metamask/design-system-twrnc-preset', () => {
+  const twFn = () => ({});
+  twFn.style = () => ({});
+  twFn.color = () => 'black';
+  return {
+    useTailwind: () => twFn,
+  };
+});
 
 // Mock Animated to prevent act() warnings
 jest.mock('react-native', () => {
@@ -638,7 +641,7 @@ describe('PerpsMarketListView', () => {
   });
 
   describe('Search Functionality', () => {
-    it('shows search bar always visible', async () => {
+    it('shows search bar always visible', () => {
       renderWithProvider(<PerpsMarketListView />, { state: mockState });
 
       expect(

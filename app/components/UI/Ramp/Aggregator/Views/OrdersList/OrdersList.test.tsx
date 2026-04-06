@@ -238,6 +238,28 @@ jest.mock('../../../hooks/useRampNavigation', () => ({
   useRampNavigation: jest.fn(() => ({ goToDeposit: mockGoToDeposit })),
 }));
 
+// Normalize non-deterministic Reanimated animation values in snapshots.
+// Animated rotation/scale values vary between runs because Reanimated's mock
+// produces time-dependent shared values.
+function normalizeAnimatedProps(node: unknown): unknown {
+  if (node === null || node === undefined || typeof node !== 'object') return node;
+  if (Array.isArray(node)) return node.map(normalizeAnimatedProps);
+  const obj = node as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === 'jestAnimatedStyle') {
+      result[key] = { value: {} };
+    } else if (key === 'children' && Array.isArray(value)) {
+      result[key] = value.map(normalizeAnimatedProps);
+    } else if (key === 'props' && typeof value === 'object' && value !== null) {
+      result[key] = normalizeAnimatedProps(value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 describe('OrdersList', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
@@ -246,19 +268,19 @@ describe('OrdersList', () => {
 
   it('renders correctly', () => {
     render(<OrdersList />);
-    expect(screen.toJSON()).toMatchSnapshot();
+    expect(normalizeAnimatedProps(screen.toJSON())).toMatchSnapshot();
   });
 
   it('renders buy only correctly when pressing buy filter', () => {
     render(<OrdersList />);
     fireEvent.press(screen.getByRole('button', { name: 'Purchased' }));
-    expect(screen.toJSON()).toMatchSnapshot();
+    expect(normalizeAnimatedProps(screen.toJSON())).toMatchSnapshot();
   });
 
   it('renders sell only correctly when pressing sell filter', () => {
     render(<OrdersList />);
     fireEvent.press(screen.getByRole('button', { name: 'Sold' }));
-    expect(screen.toJSON()).toMatchSnapshot();
+    expect(normalizeAnimatedProps(screen.toJSON())).toMatchSnapshot();
   });
 
   it('renders empty sell message', () => {
@@ -267,7 +289,7 @@ describe('OrdersList', () => {
       [testOrders[0]], // a buy order,
     );
     fireEvent.press(screen.getByRole('button', { name: 'Sold' }));
-    expect(screen.toJSON()).toMatchSnapshot();
+    expect(normalizeAnimatedProps(screen.toJSON())).toMatchSnapshot();
   });
 
   it('renders empty buy message', () => {
@@ -276,15 +298,15 @@ describe('OrdersList', () => {
       [testOrders[1]], // a sell order,
     );
     fireEvent.press(screen.getByRole('button', { name: 'Purchased' }));
-    expect(screen.toJSON()).toMatchSnapshot();
+    expect(normalizeAnimatedProps(screen.toJSON())).toMatchSnapshot();
   });
 
   it('resets filter to all after other filter was set', () => {
     render(<OrdersList />);
     fireEvent.press(screen.getByRole('button', { name: 'Sold' }));
-    expect(screen.toJSON()).toMatchSnapshot();
+    expect(normalizeAnimatedProps(screen.toJSON())).toMatchSnapshot();
     fireEvent.press(screen.getByRole('button', { name: 'All' }));
-    expect(screen.toJSON()).toMatchSnapshot();
+    expect(normalizeAnimatedProps(screen.toJSON())).toMatchSnapshot();
   });
 
   it('navigates when pressing item', () => {

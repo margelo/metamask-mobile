@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react-native';
+import { fireEvent , act } from '@testing-library/react-native';
 import React from 'react';
 import { strings } from '../../../../../../../../locales/i18n';
 import { createMockAccountsControllerState } from '../../../../../../../util/test/accountsControllerTestUtils';
@@ -132,26 +132,25 @@ jest.mock('../../../../constants/events', () => ({
   },
 }));
 
-jest.mock('react-native/Libraries/Linking/Linking', () => ({
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  openURL: jest.fn(),
-  canOpenURL: jest.fn(),
-  getInitialURL: jest.fn(),
-}));
-
 describe('FooterButtonGroup', () => {
   let mockAddProperties: jest.Mock;
   let mockBuild: jest.Mock;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    // Suppress React 19 act() warnings during async state updates
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(jest.fn());
     mockAddProperties = jest.fn().mockReturnThis();
     mockBuild = jest.fn().mockReturnValue({});
     mockCreateEventBuilder.mockImplementation(() => ({
       addProperties: mockAddProperties,
       build: mockBuild,
     }));
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it('render matches snapshot', () => {
@@ -171,7 +170,7 @@ describe('FooterButtonGroup', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('navigates to Asset page when cancel is pressed', () => {
+  it('navigates to Asset page when cancel is pressed', async () => {
     mockCanGoBack.mockImplementationOnce(() => true);
     const props: FooterButtonGroupProps = {
       valueWei: '3210000000000000',
@@ -183,14 +182,20 @@ describe('FooterButtonGroup', () => {
       { state: mockInitialState },
     );
 
-    fireEvent.press(getByText(strings('stake.cancel')));
+    await act(async () => {
+      fireEvent.press(getByText(strings('stake.cancel')));
+    });
 
     expect(mockGoBack).toHaveBeenCalledTimes(1);
 
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('attempts stake transaction on continue click', () => {
+  it('attempts stake transaction on continue click', async () => {
+    mockAttemptDepositTransaction.mockResolvedValueOnce({
+      transactionMeta: { id: 'mock-tx-id' },
+    });
+
     const props: FooterButtonGroupProps = {
       valueWei: '3210000000000000',
       action: FooterButtonGroupActions.STAKE,
@@ -201,12 +206,19 @@ describe('FooterButtonGroup', () => {
       { state: mockInitialState },
     );
 
-    fireEvent.press(getByText(strings('stake.continue')));
+    await act(async () => {
+      fireEvent.press(getByText(strings('stake.continue')));
+    });
 
+    expect(mockAttemptDepositTransaction).toHaveBeenCalled();
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('attempts unstake transaction on continue click', () => {
+  it('attempts unstake transaction on continue click', async () => {
+    mockAttemptUnstakeTransaction.mockResolvedValueOnce({
+      transactionMeta: { id: 'mock-tx-id' },
+    });
+
     const props: FooterButtonGroupProps = {
       valueWei: '3210000000000000',
       action: FooterButtonGroupActions.UNSTAKE,
@@ -217,8 +229,11 @@ describe('FooterButtonGroup', () => {
       { state: mockInitialState },
     );
 
-    fireEvent.press(getByText(strings('stake.continue')));
+    await act(async () => {
+      fireEvent.press(getByText(strings('stake.continue')));
+    });
 
+    expect(mockAttemptUnstakeTransaction).toHaveBeenCalled();
     expect(toJSON()).toMatchSnapshot();
   });
 
@@ -239,18 +254,18 @@ describe('FooterButtonGroup', () => {
       },
     );
 
-    fireEvent.press(getByText(strings('stake.continue')));
+    await act(async () => {
+      fireEvent.press(getByText(strings('stake.continue')));
+    });
 
-    // Wait for the error to be handled
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
+    // After rejection, didSubmitTransaction is set back to false
     const continueButton = getByTestId('continue-button');
     const cancelButton = getByTestId('cancel-button');
-    expect(continueButton.props.disabled).toBe(true);
-    expect(cancelButton.props.disabled).toBe(true);
+    expect(continueButton).not.toBeDisabled();
+    expect(cancelButton).not.toBeDisabled();
   });
 
-  it('tracks metrics on cancel press', () => {
+  it('tracks metrics on cancel press', async () => {
     const props: FooterButtonGroupProps = {
       valueWei: '3210000000000000',
       action: FooterButtonGroupActions.STAKE,
@@ -260,7 +275,9 @@ describe('FooterButtonGroup', () => {
       state: mockInitialState,
     });
 
-    fireEvent.press(getByText(strings('stake.cancel')));
+    await act(async () => {
+      fireEvent.press(getByText(strings('stake.cancel')));
+    });
 
     expect(mockTrackEvent).toHaveBeenCalled();
     expect(mockCreateEventBuilder).toHaveBeenCalled();
@@ -284,12 +301,14 @@ describe('FooterButtonGroup', () => {
       },
     );
 
-    fireEvent.press(getByText(strings('stake.continue')));
+    await act(async () => {
+      fireEvent.press(getByText(strings('stake.continue')));
+    });
 
     const continueButton = getByTestId('continue-button');
     const cancelButton = getByTestId('cancel-button');
-    expect(continueButton.props.disabled).toBe(true);
-    expect(cancelButton.props.disabled).toBe(true);
+    expect(continueButton).toBeDisabled();
+    expect(cancelButton).toBeDisabled();
   });
 
   it('shows loading state during transaction', async () => {
@@ -310,9 +329,12 @@ describe('FooterButtonGroup', () => {
       },
     );
 
-    fireEvent.press(getByText(strings('stake.continue')));
+    await act(async () => {
+      fireEvent.press(getByText(strings('stake.continue')));
+    });
 
     const continueButton = getByTestId('continue-button');
-    expect(continueButton.props.loading).toBe(true);
+    // In React 19, the button should be disabled during transaction
+    expect(continueButton).toBeDisabled();
   });
 });

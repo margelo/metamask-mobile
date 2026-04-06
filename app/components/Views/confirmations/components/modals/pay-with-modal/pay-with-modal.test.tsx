@@ -74,6 +74,22 @@ jest.mock('../../../hooks/send/metrics/useAssetSelectionMetrics', () => ({
   }),
 }));
 
+jest.mock('../../../../../UI/Earn/hooks/useMusdConversionTokens', () => ({
+  useMusdConversionTokens: () => ({
+    filterAllowedTokens: jest.fn((tokens: unknown[]) => tokens),
+    isConversionToken: jest.fn(() => false),
+    isMusdSupportedOnChain: jest.fn(() => false),
+    hasConvertibleTokensByChainId: jest.fn(() => false),
+    tokens: [],
+  }),
+}));
+
+jest.mock('../../../../../UI/Earn/hooks/useMusdPaymentToken', () => ({
+  useMusdPaymentToken: () => ({
+    onPaymentTokenChange: jest.fn(),
+  }),
+}));
+
 const CHAIN_ID_1_MOCK = CHAIN_IDS.MAINNET as Hex;
 const CHAIN_ID_2_MOCK = '0x2' as Hex;
 
@@ -214,7 +230,7 @@ describe('PayWithModal', () => {
   );
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     useTransactionPayWithdrawMock.mockReturnValue({
       isWithdraw: false,
@@ -253,7 +269,7 @@ describe('PayWithModal', () => {
     );
   });
 
-  it('renders tokens', async () => {
+  it('renders tokens', () => {
     const { getByText } = render();
 
     expect(getByText('Native Token 1')).toBeDefined();
@@ -266,12 +282,10 @@ describe('PayWithModal', () => {
   });
 
   describe('on token select', () => {
-    it('sets pay asset', async () => {
+    it('sets pay asset', () => {
       const { getByText } = render();
 
-      await waitFor(() => {
-        fireEvent.press(getByText('Test Token 1'));
-      });
+      fireEvent.press(getByText('Test Token 1'));
 
       expect(setPayTokenMock).toHaveBeenCalledWith({
         address: TOKENS_MOCK[1].address,
@@ -279,7 +293,7 @@ describe('PayWithModal', () => {
       });
     });
 
-    it('calls onPerpsPaymentTokenChange via close callback when type is perpsDepositAndOrder', async () => {
+    it('calls onPerpsPaymentTokenChange via close callback when type is perpsDepositAndOrder', () => {
       useTransactionMetadataRequestMock.mockReturnValue({
         id: transactionIdMock,
         chainId: CHAIN_ID_1_MOCK,
@@ -292,9 +306,7 @@ describe('PayWithModal', () => {
 
       const { getByText } = render();
 
-      await waitFor(() => {
-        fireEvent.press(getByText('Test Token 1'));
-      });
+      fireEvent.press(getByText('Test Token 1'));
 
       expect(onPerpsPaymentTokenChangeMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -365,7 +377,7 @@ describe('PayWithModal', () => {
       expect(getAvailableTokensMock).not.toHaveBeenCalled();
     });
 
-    it('adds zero-balance token to TokensController on withdraw selection', async () => {
+    it('adds zero-balance token to TokensController on withdraw selection', () => {
       const zeroBalanceToken = {
         accountType: EthAccountType.Eoa,
         address: '0xZeroBalanceToken',
@@ -384,9 +396,7 @@ describe('PayWithModal', () => {
 
       const { getByText } = render();
 
-      await waitFor(() => {
-        fireEvent.press(getByText('Zero Token'));
-      });
+      fireEvent.press(getByText('Zero Token'));
 
       expect(mockAddTokens).toHaveBeenCalled();
       expect(setPayTokenMock).toHaveBeenCalled();

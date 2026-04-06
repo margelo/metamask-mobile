@@ -104,9 +104,12 @@ jest.mock('../../../util/device', () => ({
   isAndroid: jest.fn(),
 }));
 
-jest.mock('react-native/Libraries/Alert/Alert', () => ({
-  alert: jest.fn(),
-}));
+jest.mock('react-native/Libraries/Alert/Alert', () => {
+  const alert = {
+    alert: jest.fn(),
+  };
+  return { __esModule: true, default: alert, ...alert };
+});
 
 const mockTrackEvent = jest.fn();
 jest.mock('../../../util/analytics/analytics', () => ({
@@ -443,11 +446,20 @@ describe('ResetPassword', () => {
       fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
     });
 
+    const checkbox = component.getByTestId(
+      ChoosePasswordSelectorsIDs.I_UNDERSTAND_CHECKBOX_ID,
+    );
+    await act(async () => {
+      fireEvent.press(checkbox);
+    });
+
     const submitButton = component.getByTestId(
       ChoosePasswordSelectorsIDs.SUBMIT_BUTTON_ID,
     );
 
-    fireEvent.press(submitButton);
+    await act(async () => {
+      fireEvent.press(submitButton);
+    });
 
     await waitFor(() => {
       expect(NavigationService.navigation.navigate).toHaveBeenCalledWith(
@@ -851,7 +863,7 @@ describe('ResetPassword', () => {
       fireEvent.changeText(newPasswordInput, 'NewPassword123');
     });
 
-    expect(newPasswordInput.props.secureTextEntry).toBe(true);
+    expect(newPasswordInput).toHaveProp('secureTextEntry', true);
 
     const newPasswordShowIcon = component.getByTestId(
       ChoosePasswordSelectorsIDs.NEW_PASSWORD_SHOW_ICON_ID,
@@ -860,7 +872,7 @@ describe('ResetPassword', () => {
     fireEvent.press(newPasswordShowIcon);
 
     await waitFor(() => {
-      expect(newPasswordInput.props.secureTextEntry).toBe(false);
+      expect(newPasswordInput).toHaveProp('secureTextEntry', false);
     });
 
     const confirmPasswordInput = component.getByTestId(
@@ -871,7 +883,7 @@ describe('ResetPassword', () => {
       fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
     });
 
-    expect(confirmPasswordInput.props.secureTextEntry).toBe(true);
+    expect(confirmPasswordInput).toHaveProp('secureTextEntry', true);
 
     const confirmPasswordShowIcon = component.getByTestId(
       ChoosePasswordSelectorsIDs.CONFIRM_PASSWORD_SHOW_ICON_ID,
@@ -880,7 +892,7 @@ describe('ResetPassword', () => {
     fireEvent.press(confirmPasswordShowIcon);
 
     await waitFor(() => {
-      expect(confirmPasswordInput.props.secureTextEntry).toBe(false);
+      expect(confirmPasswordInput).toHaveProp('secureTextEntry', false);
     });
   });
 
@@ -917,6 +929,13 @@ describe('ResetPassword', () => {
 
       await act(async () => {
         fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
+      });
+
+      const checkbox = component.getByTestId(
+        ChoosePasswordSelectorsIDs.I_UNDERSTAND_CHECKBOX_ID,
+      );
+      await act(async () => {
+        fireEvent.press(checkbox);
       });
 
       const submitButton = component.getByTestId(
@@ -967,6 +986,13 @@ describe('ResetPassword', () => {
 
       await act(async () => {
         fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
+      });
+
+      const checkbox = component.getByTestId(
+        ChoosePasswordSelectorsIDs.I_UNDERSTAND_CHECKBOX_ID,
+      );
+      await act(async () => {
+        fireEvent.press(checkbox);
       });
 
       const submitButton = component.getByTestId(
@@ -1026,6 +1052,13 @@ describe('ResetPassword', () => {
 
       await act(async () => {
         fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
+      });
+
+      const checkbox = component.getByTestId(
+        ChoosePasswordSelectorsIDs.I_UNDERSTAND_CHECKBOX_ID,
+      );
+      await act(async () => {
+        fireEvent.press(checkbox);
       });
 
       const submitButton = component.getByTestId(
@@ -1113,6 +1146,13 @@ describe('ResetPassword', () => {
         fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
       });
 
+      const checkbox = component.getByTestId(
+        ChoosePasswordSelectorsIDs.I_UNDERSTAND_CHECKBOX_ID,
+      );
+      await act(async () => {
+        fireEvent.press(checkbox);
+      });
+
       const submitButton = component.getByTestId(
         ChoosePasswordSelectorsIDs.SUBMIT_BUTTON_ID,
       );
@@ -1190,6 +1230,13 @@ describe('ResetPassword', () => {
         fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
       });
 
+      const checkbox = component.getByTestId(
+        ChoosePasswordSelectorsIDs.I_UNDERSTAND_CHECKBOX_ID,
+      );
+      await act(async () => {
+        fireEvent.press(checkbox);
+      });
+
       const submitButton = component.getByTestId(
         ChoosePasswordSelectorsIDs.SUBMIT_BUTTON_ID,
       );
@@ -1241,6 +1288,13 @@ describe('ResetPassword', () => {
 
       await act(async () => {
         fireEvent.changeText(confirmPasswordInput, 'NewPassword123');
+      });
+
+      const checkbox = component.getByTestId(
+        ChoosePasswordSelectorsIDs.I_UNDERSTAND_CHECKBOX_ID,
+      );
+      await act(async () => {
+        fireEvent.press(checkbox);
       });
 
       const submitButton = component.getByTestId(
