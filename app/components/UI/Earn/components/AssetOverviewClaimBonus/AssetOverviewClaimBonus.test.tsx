@@ -20,11 +20,6 @@ jest.mock('../MerklRewards/hooks/useMerklBonusClaim');
 jest.mock('../../../../hooks/useAnalytics/useAnalytics');
 jest.mock('../../../../hooks/useTooltipModal');
 jest.mock('../../../TokenDetails/hooks/useTokenBalance');
-jest.mock('../../hooks/useMusdBalance', () => ({
-  useMusdBalance: () => ({
-    fiatBalanceByChain: {},
-  }),
-}));
 jest.mock('react-native/Libraries/Linking/Linking', () => ({
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),

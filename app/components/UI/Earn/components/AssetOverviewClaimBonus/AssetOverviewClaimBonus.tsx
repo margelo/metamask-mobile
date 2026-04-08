@@ -29,33 +29,14 @@ import { MUSD_EVENTS_CONSTANTS } from '../../constants/events/musdEvents';
 import AppConstants from '../../../../../core/AppConstants';
 import { selectNetworkConfigurationByChainId } from '../../../../../selectors/networkController';
 import { RootState } from '../../../../../reducers';
-import { useNetworkName } from '../../../../Views/confirmations/hooks/useNetworkName';
 import { ASSET_OVERVIEW_CLAIM_BONUS_TEST_IDS } from './AssetOverviewClaimBonus.testIds';
 import { MUSD_CONVERSION_APY } from '../../constants/musd';
-import { useMusdBalance } from '../../hooks/useMusdBalance';
 import useTokenBalance from '../../../TokenDetails/hooks/useTokenBalance';
 import TagBase, {
   TagSeverity,
 } from '../../../../../component-library/base-components/TagBase';
 
 const { EVENT_LOCATIONS } = MUSD_EVENTS_CONSTANTS;
-
-const BonusChainRow = ({ chainId, bonus }: { chainId: Hex; bonus: number }) => {
-  const networkName = useNetworkName(chainId);
-  return (
-    <Box
-      flexDirection={BoxFlexDirection.Row}
-      alignItems={BoxAlignItems.Center}
-      justifyContent={BoxJustifyContent.Between}
-      twClassName="py-2"
-    >
-      <Text variant={TextVariant.BodyMd}>{networkName}</Text>
-      <Text variant={TextVariant.BodyMd} fontWeight={FontWeight.Medium}>
-        {`+$${bonus.toFixed(2)}`}
-      </Text>
-    </Box>
-  );
-};
 
 interface AssetOverviewClaimBonusProps {
   asset: TokenI;
@@ -90,25 +71,13 @@ const AssetOverviewClaimBonus: React.FC<AssetOverviewClaimBonusProps> = ({
 
   // Use live balance from Redux store — route params may be stale.
   const { balance: liveBalance } = useTokenBalance(asset);
-  const { fiatBalanceByChain } = useMusdBalance();
 
   // State derivation
   const balance = parseFloat(liveBalance || asset.balance) || 0;
   const hasBalance = balance > 0;
   const hasClaimable = claimableReward !== null;
 
-  // Per-chain estimated annual bonus: fiat balance × APY%
-  const perChainBonuses = useMemo(() => {
-    const entries = Object.entries(fiatBalanceByChain)
-      .filter(([, fiatBalance]) => parseFloat(fiatBalance) > 0)
-      .map(([chainId, fiatBalance]) => ({
-        chainId: chainId as Hex,
-        bonus: parseFloat(fiatBalance) * (MUSD_CONVERSION_APY / 100),
-      }));
-    return entries;
-  }, [fiatBalanceByChain]);
-
-  // Aggregated estimated annual bonus
+  // Estimated annual bonus: token balance × APY% (mUSD is 1:1 with USD)
   const estimatedAnnualBonus = useMemo(
     () => balance * (MUSD_CONVERSION_APY / 100),
     [balance],
@@ -281,36 +250,25 @@ const AssetOverviewClaimBonus: React.FC<AssetOverviewClaimBonusProps> = ({
           </TagBase>
         </Box>
 
-        {/* Estimated annual bonus — per-chain or aggregated */}
-        {perChainBonuses.length > 1 ? (
-          <Box testID={ASSET_OVERVIEW_CLAIM_BONUS_TEST_IDS.ANNUAL_BONUS_ROW}>
-            <Text variant={TextVariant.BodyMd} twClassName="py-2">
-              {strings('earn.estimated_annual_bonus')}
-            </Text>
-            {perChainBonuses.map(({ chainId, bonus }) => (
-              <BonusChainRow key={chainId} chainId={chainId} bonus={bonus} />
-            ))}
-          </Box>
-        ) : (
-          <Box
-            flexDirection={BoxFlexDirection.Row}
-            alignItems={BoxAlignItems.Center}
-            justifyContent={BoxJustifyContent.Between}
-            twClassName="py-2"
-            testID={ASSET_OVERVIEW_CLAIM_BONUS_TEST_IDS.ANNUAL_BONUS_ROW}
+        {/* Row 1: Estimated annual bonus */}
+        <Box
+          flexDirection={BoxFlexDirection.Row}
+          alignItems={BoxAlignItems.Center}
+          justifyContent={BoxJustifyContent.Between}
+          twClassName="py-2"
+          testID={ASSET_OVERVIEW_CLAIM_BONUS_TEST_IDS.ANNUAL_BONUS_ROW}
+        >
+          <Text variant={TextVariant.BodyMd}>
+            {strings('earn.estimated_annual_bonus')}
+          </Text>
+          <Text
+            variant={TextVariant.BodyMd}
+            fontWeight={FontWeight.Medium}
+            testID={ASSET_OVERVIEW_CLAIM_BONUS_TEST_IDS.ANNUAL_BONUS_VALUE}
           >
-            <Text variant={TextVariant.BodyMd}>
-              {strings('earn.estimated_annual_bonus')}
-            </Text>
-            <Text
-              variant={TextVariant.BodyMd}
-              fontWeight={FontWeight.Medium}
-              testID={ASSET_OVERVIEW_CLAIM_BONUS_TEST_IDS.ANNUAL_BONUS_VALUE}
-            >
-              {formattedAnnualBonus}
-            </Text>
-          </Box>
-        )}
+            {formattedAnnualBonus}
+          </Text>
+        </Box>
 
         {/* Row 2: Lifetime bonus claimed */}
         <Box
