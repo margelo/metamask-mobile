@@ -20,6 +20,11 @@ jest.mock('../MerklRewards/hooks/useMerklBonusClaim');
 jest.mock('../../../../hooks/useAnalytics/useAnalytics');
 jest.mock('../../../../hooks/useTooltipModal');
 jest.mock('../../../TokenDetails/hooks/useTokenBalance');
+jest.mock('../../hooks/useMusdBalance', () => ({
+  useMusdBalance: () => ({
+    fiatBalanceByChain: {},
+  }),
+}));
 jest.mock('react-native/Libraries/Linking/Linking', () => ({
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
@@ -55,6 +60,7 @@ const createMockMerklClaimData = (
   lifetimeBonusClaimed: null,
   hasPendingClaim: false,
   isClaiming: false,
+  hasClaimedBefore: false,
   error: null,
   claimRewards: jest.fn().mockResolvedValue(undefined),
   ...overrides,

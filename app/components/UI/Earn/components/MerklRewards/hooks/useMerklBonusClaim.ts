@@ -23,6 +23,8 @@ export interface MerklClaimData {
   lifetimeBonusClaimed: string | null;
   hasPendingClaim: boolean;
   isClaiming: boolean;
+  /** True if the user has claimed a bonus at least once before. */
+  hasClaimedBefore: boolean;
   /** Set when the last claim attempt failed (e.g. no reward data, network). */
   error: string | null;
   claimRewards: () => Promise<
@@ -39,6 +41,7 @@ const DEFAULT_MERKL_CLAIM_DATA: MerklClaimData = {
   lifetimeBonusClaimed: null,
   hasPendingClaim: false,
   isClaiming: false,
+  hasClaimedBefore: false,
   error: null,
   claimRewards: async () => undefined,
 };
@@ -193,6 +196,7 @@ export const useMerklBonusClaim = (
           : null,
       lifetimeBonusClaimed,
       hasPendingClaim,
+      hasClaimedBefore,
       claimRewards: claimRewardsWithSessionLock,
       isClaiming,
       error: claimError,
@@ -202,6 +206,7 @@ export const useMerklBonusClaim = (
     claimableReward,
     lifetimeBonusClaimed,
     hasPendingClaim,
+    hasClaimedBefore,
     claimRewardsWithSessionLock,
     isClaiming,
     claimError,

@@ -48,11 +48,16 @@ const MusdAggregatedRow = () => {
   const privacyMode = useSelector(selectPrivacyMode);
   const { tokenBalanceAggregated, fiatBalanceAggregatedFormatted } =
     useMusdBalance();
-  const { claimableReward, hasPendingClaim, claimRewards, isClaiming } =
-    useMerklBonusClaim(
-      LINEA_MUSD_ASSET_FOR_MERKL,
-      MUSD_EVENTS_CONSTANTS.EVENT_LOCATIONS.HOME_CASH_SECTION,
-    );
+  const {
+    claimableReward,
+    hasPendingClaim,
+    claimRewards,
+    isClaiming,
+    hasClaimedBefore,
+  } = useMerklBonusClaim(
+    LINEA_MUSD_ASSET_FOR_MERKL,
+    MUSD_EVENTS_CONSTANTS.EVENT_LOCATIONS.HOME_CASH_SECTION,
+  );
   const { trackEvent, createEventBuilder } = useAnalytics();
   const networkName = useNetworkName(LINEA_MUSD_ASSET_FOR_MERKL.chainId as Hex);
 
@@ -149,6 +154,14 @@ const MusdAggregatedRow = () => {
                     {strings('earn.claim_bonus')}
                   </Text>
                 </Pressable>
+              ) : hasClaimedBefore ? (
+                <Text
+                  variant={TextVariant.BodySm}
+                  fontWeight={FontWeight.Medium}
+                  color={TextColor.SuccessDefault}
+                >
+                  {strings('earn.claimed')}
+                </Text>
               ) : (
                 <Text
                   variant={TextVariant.BodySm}
