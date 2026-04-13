@@ -21,6 +21,7 @@ import { GasFeeToken } from '@metamask/transaction-controller';
 import { Token } from '@metamask/assets-controllers';
 import { toHex } from '@metamask/controller-utils';
 import { AccountsControllerState } from '@metamask/accounts-controller';
+import { MUSD_TOKEN_ADDRESS } from '../../../../../UI/Earn/constants/musd';
 
 const mockShowToast = jest.fn();
 const mockCloseToast = jest.fn();
@@ -165,6 +166,20 @@ describe('GasFeeTokenToast', () => {
         hasNoTimeout: false,
       }),
     );
+  });
+
+  it('does not show toast when the selected gas fee token is mUSD', () => {
+    (useSelectedGasFeeToken as jest.Mock).mockReturnValue(GAS_FEE_TOKEN_MOCK);
+
+    renderToastHook(TOKENS_CONTROLLER_STATE, {
+      gasFeeToken: {
+        ...GAS_FEE_TOKEN_MOCK,
+        tokenAddress: MUSD_TOKEN_ADDRESS,
+        symbol: 'mUSD',
+      },
+    });
+
+    expect(mockShowToast).not.toHaveBeenCalled();
   });
 
   it('calls closeToast when close button is pressed', () => {

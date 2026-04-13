@@ -15,6 +15,7 @@ import { IconName } from '../../../../../../component-library/components/Icons/I
 import { ButtonVariants } from '../../../../../../component-library/components/Buttons/Button';
 import { useTokenWithBalance } from '../../../hooks/tokens/useTokenWithBalance';
 import { getNetworkImageSource } from '../../../../../../util/networks';
+import { isMusdToken } from '../../../../../UI/Earn/constants/musd';
 
 export function GasFeeTokenToast() {
   const transactionMetadata = useTransactionMetadataRequest();
@@ -38,6 +39,7 @@ export function GasFeeTokenToast() {
   useEffect(() => {
     if (!toast || !gasFeeToken || !transactionMetadata) return;
     if (gasFeeToken.tokenAddress === prevRef.current) return;
+    if (isMusdToken(gasFeeToken.tokenAddress)) return;
 
     prevRef.current = gasFeeToken.tokenAddress;
 
