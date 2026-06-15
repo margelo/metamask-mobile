@@ -88,6 +88,12 @@ function withPrefetchKey(
   return { ...init, headers };
 }
 
+// NOTE: nitro-fetch uses a buffered transport by default — the full response
+// body is downloaded natively before the Promise resolves. `response.body.getReader()`
+// is API-compatible (returns a ReadableStream that delivers all bytes in one chunk)
+// but does NOT stream incrementally. For true streaming use either:
+//   - `{ stream: true }` in fetch options (nitro-fetch Cronet streaming transport)
+//   - import `fetch` from 'expo/fetch' directly (see bridge-controller-init.ts)
 global.fetch = (input: RequestInfo | URL, init?: RequestInit) =>
   nitroFetch(input, withPrefetchKey(input, init));
 

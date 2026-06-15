@@ -1,5 +1,6 @@
 /* eslint-disable import-x/no-nodejs-modules */
 import { BackHandler, Platform } from 'react-native';
+import { fetch as nitroFetch } from 'react-native-nitro-fetch';
 
 // RN 0.74+ removed `BackHandler.removeEventListener`. Some third-party
 // libraries (notably `@metamask/design-system-react-native`'s `BottomSheet`)
@@ -267,8 +268,6 @@ if (enableApiCallLogs || isTestEnvironment) {
   (async () => {
     const raw = LaunchArguments.value();
     const mockServerPort = raw?.mockServerPort ?? defaultMockPort;
-    const { fetch: originalFetch } = global;
-
     // eslint-disable-next-line no-console
     console.log(
       `[E2E SHIM] Platform: ${Platform.OS}, mockServerPort: ${mockServerPort}`,
@@ -291,7 +290,7 @@ if (enableApiCallLogs || isTestEnvironment) {
       // eslint-disable-next-line no-console
       console.log(`[E2E SHIM] Trying mock server at: ${testUrl}`);
 
-      const available = await originalFetch(`${testUrl}/health-check`)
+      const available = await nitroFetch(`${testUrl}/health-check`)
         .then((res) => {
           // eslint-disable-next-line no-console
           console.log(`[E2E SHIM] ${host} health check: ${res.ok}`);
@@ -312,7 +311,8 @@ if (enableApiCallLogs || isTestEnvironment) {
       }
     }
 
-    // if mockServer is off we route to original destination
+    // if mockServer is off we route to original destination.
+    // nitroFetch is imported directly — no dependency on global.fetch timing.
     global.fetch = async (url, options) => {
       // Extract URL string from Request or URL objects
       let urlString;
@@ -328,11 +328,11 @@ if (enableApiCallLogs || isTestEnvironment) {
       }
 
       return isMockServerAvailable
-        ? originalFetch(
+        ? nitroFetch(
             `${MOCKTTP_URL}/proxy?url=${encodeURIComponent(urlString)}`,
             options,
-          ).catch(() => originalFetch(url, options))
-        : originalFetch(url, options);
+          ).catch(() => nitroFetch(url, options))
+        : nitroFetch(url, options);
     };
 
     if (isMockServerAvailable) {
