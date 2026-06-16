@@ -10,8 +10,17 @@ export const STATIC_ASSETS_MOCKS: MockEventsObject = {
       response: '',
     },
     {
+      // v2 token icon CDN (eip155/{chainId}/erc20/{address}.png)
       urlEndpoint:
         /^https:\/\/static\.cx\.metamask\.io\/api\/v2\/tokenIcons\/assets\/.+\.png$/,
+      responseCode: 200,
+      response: '',
+    },
+    {
+      // v1 token icon CDN ({chainId}/{address}.png) — used by Bridge, Predict,
+      // Rewards, and any component that still references the legacy URL format.
+      urlEndpoint:
+        /^https:\/\/static\.cx\.metamask\.io\/api\/v1\/tokenIcons\/.+\.png$/,
       responseCode: 200,
       response: '',
     },
