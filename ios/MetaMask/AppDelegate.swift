@@ -56,16 +56,25 @@ class AppDelegate: ExpoAppDelegate {
     window = UIWindow(frame: UIScreen.main.bounds)
     window?.makeKeyAndVisible()
 
-    // Safe Firebase configuration — validates plist before configure() to prevent
-    // FIRInstallations from throwing an uncatchable NSException on launch when
-    // GoogleService-Info.plist is missing or contains a blank/placeholder/mock API_KEY.
-    // Real Firebase API keys always start with "AIzaSy"; anything else (empty, mock-*, etc.)
-    // would cause validateAPIKey: to throw an NSException that Swift cannot catch.
+    // Safe Firebase configuration — fully validates GoogleService-Info.plist before
+    // configure() to prevent Firebase from throwing an uncatchable NSException on launch
+    // (Swift cannot catch ObjC NSExceptions). This makes startup crash-proof even when
+    // Firebase files are missing, incomplete, or contain placeholder/mock values.
+    //
+    // We require every field FIROptions needs to construct a valid default app:
+    //   - API_KEY: real Google keys always start with "AIzaSy"; empty/mock-* values would
+    //     make FIRInstallations' validateAPIKey: throw on launch.
+    //   - GOOGLE_APP_ID / GCM_SENDER_ID / PROJECT_ID: required by FIROptions; missing or
+    //     blank values lead to assertions/exceptions during configure().
+    // If any check fails we simply skip configure(); Firebase-dependent features stay off
+    // but the app launches normally.
     if FirebaseApp.app() == nil,
        let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
        let plist = NSDictionary(contentsOfFile: path),
-       let apiKey = plist["API_KEY"] as? String,
-       apiKey.hasPrefix("AIzaSy") {
+       let apiKey = plist["API_KEY"] as? String, apiKey.hasPrefix("AIzaSy"),
+       let googleAppID = plist["GOOGLE_APP_ID"] as? String, !googleAppID.isEmpty,
+       let gcmSenderID = plist["GCM_SENDER_ID"] as? String, !gcmSenderID.isEmpty,
+       let projectID = plist["PROJECT_ID"] as? String, !projectID.isEmpty {
       FirebaseApp.configure()
     }
 
