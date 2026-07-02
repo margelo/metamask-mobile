@@ -15,6 +15,7 @@ import styleSheet from './DeveloperOptions.styles';
 import SentryTest from './SentryTest';
 import HapticsDeveloperOptionsSection from './HapticsDeveloperOptionsSection';
 import IdentityDeveloperOptionsSection from './IdentityDeveloperOptionsSection';
+import WebSocketBenchmarkDeveloperOptionsSection from './WebSocketBenchmarkDeveloperOptionsSection';
 ///: BEGIN:ONLY_INCLUDE_IF(sample-feature)
 import SampleFeatureDevSettingsEntryPoint from '../../../../features/SampleFeature/components/views/SampleFeatureDevSettingsEntryPoint/SampleFeatureDevSettingsEntryPoint';
 ///: END:ONLY_INCLUDE_IF
@@ -90,6 +91,7 @@ const DeveloperOptions = () => {
         <IdentityDeveloperOptionsSection />
         <NotificationsDeveloperOptionsSection />
         <HapticsDeveloperOptionsSection />
+        <WebSocketBenchmarkDeveloperOptionsSection />
       </ScrollView>
     </SafeAreaView>
   );

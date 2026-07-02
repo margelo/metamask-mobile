@@ -1,0 +1,189 @@
+================================================================================
+  WEBSOCKET BENCHMARK — ON-DEVICE GROUND TRUTH (REAL RUN)
+  RN bridge WebSocket vs NitroWebSocket, measured inside React Native
+================================================================================
+
+Run date   : 2026-06-30T16:09:05Z
+Endpoint   : ws://localhost:18765  (local echo server)
+Runtime    : React Native (simulator) — BOTH implementations are the REAL ones
+Sample size: n=10–20 per scenario (small — treat tails as noisy)
+
+  This is the real thing: no modelled +2.8 ms bridge cost, no `ws` npm
+  stand-in. The RN bridge WebSocket and the real NitroWebSocket both hit the
+  same echo server on the same device, so the only variable is the
+  implementation.
+
+
+--------------------------------------------------------------------------------
+  HEADLINE: THERE IS NO 100x–500x. NOT EVEN CLOSE.
+--------------------------------------------------------------------------------
+
+  The biggest real win here is 2.53x (and that one is a tail-latency effect,
+  not a median win). In several scenarios NitroWebSocket is actually SLOWER.
+  This is the honest picture the modelled 477x/497x lab numbers could not show.
+
+  Why so different from the lab run?
+    - Real implementations have real fixed costs. Nitro's JSI call + adapter
+      event dispatch adds ~0.5–0.6 ms per discrete operation. The lab model
+      assumed Nitro overhead = 0.
+    - Localhost echo = near-zero network, so these are best-case for ratios,
+      yet they still stay tiny because the per-op costs are comparable.
+    - Simulator runs on a fast Mac CPU, which shrinks the bridge penalty
+      relative to a real phone.
+
+
+--------------------------------------------------------------------------------
+  RESULTS AT A GLANCE
+--------------------------------------------------------------------------------
+
+  Scenario                      RN bridge     Nitro        Result
+  ----------------------------  -----------   ----------   ------------------------
+  Cold-start latency (mean)     0.539 ms      1.196 ms     RN faster (Nitro 0.45x)
+  Price stream (msg/s)          7,293         11,063       Nitro faster (1.52x)
+  Orderbook per-msg (mean)      0.198 ms      0.097 ms     Nitro faster (2.04x)
+  Heartbeat RTT (mean)          1.609 ms      0.637 ms     Nitro faster (2.53x)*
+  Reconnect recovery (mean)     3.658 ms      5.252 ms     RN faster (Nitro 0.70x)
+  Batch subscription (mean)     0.323 ms      0.913 ms     RN faster (Nitro 0.35x)
+
+  * Heartbeat: p50 is a tie (RN 0.505 ms vs Nitro 0.520 ms). Nitro's "win" is
+    entirely from a lower tail — RN p95 spiked to 10.484 ms, Nitro p95 1.016 ms.
+    So the benefit is CONSISTENCY, not median speed.
+
+
+--------------------------------------------------------------------------------
+  THE REAL PATTERN (this is the useful finding)
+--------------------------------------------------------------------------------
+
+  Nitro adds a small FIXED cost per discrete operation, but is more EFFICIENT
+  per message in bulk. So the winner flips depending on the workload:
+
+  WHERE NITRO WINS — bulk / high-frequency message processing
+    - Price stream throughput : 1.52x  (7,293 -> 11,063 msg/s)
+    - Orderbook burst per-msg  : 2.04x  (0.198 -> 0.097 ms)
+    - Heartbeat tail latency   : far tighter p95 (10.5 ms -> 1.0 ms)
+    When many messages flow, Nitro's zero-serialisation per-message path pulls
+    ahead and its tail is much smoother (no bridge-batch / GC spikes).
+
+  WHERE NITRO LOSES — single-shot / connection-establishment operations
+    - Cold-start (1 msg)       : 0.45x  (Nitro +0.66 ms)
+    - Batch subscribe (1 msg)  : 0.35x  (Nitro +0.59 ms)
+    - Reconnect (connect+1 msg): 0.70x  (Nitro +1.59 ms)
+    For one-off operations there's no bulk to amortise Nitro's fixed JSI/adapter
+    setup cost, so the lightweight bridge path is actually quicker here.
+
+  Mental model:
+    Few messages  -> fixed overhead dominates -> RN bridge can win.
+    Many messages -> per-message efficiency dominates -> Nitro wins + smoother.
+
+
+--------------------------------------------------------------------------------
+  HONEST CAVEATS
+--------------------------------------------------------------------------------
+
+  - Simulator, not a real phone. A real (esp. low-end Android) device makes the
+    bridge more expensive, which would shift results toward Nitro. Re-run on
+    hardware before drawing final conclusions.
+  - Localhost echo, not real servers. Add real network latency (tens of ms,
+    paid by both) and ALL these ratios compress further toward 1.0x.
+  - Small samples (n=10–20). The 10.484 ms heartbeat p95 and similar tails are
+    likely one-off GC/scheduler spikes, not stable signal. Increase n for
+    publishable numbers.
+  - Echo round-trips, not production subscribe/stream patterns. The new
+    "subscribe" mode against real Predict/RTDS endpoints will be more
+    representative still.
+
+
+--------------------------------------------------------------------------------
+  WHAT TO ACTUALLY CLAIM
+--------------------------------------------------------------------------------
+
+  - NitroWebSocket's real advantage is high-frequency throughput (~1.5–2x) and
+    much tighter tail latency (smoother UI, fewer jank spikes on busy feeds).
+  - It is NOT a universal speedup: for one-off connects/subscribes it can be
+    marginally slower due to fixed per-call overhead.
+  - The "hundreds of x" numbers were a loopback + modelled-bridge artifact and
+    should not be quoted. These on-device numbers are the ones to trust.
+
+
+================================================================================
+  RAW REPORT (as emitted by the in-app benchmark)
+================================================================================
+
+================================================================================
+  METAMASK IN-APP WEBSOCKET BENCHMARK — GROUND TRUTH RESULTS
+  Measured inside React Native runtime — real bridge vs real JSI timings
+================================================================================
+
+Run date   : 2026-06-30T16:09:05.440Z
+Completed  : 2026-06-30T16:09:08.148Z
+Echo server: ws://localhost:18765
+
+================================================================================
+  MESSAGE LATENCY — Subscribe -> first price_change received
+  10-token batch price_change message  n=20 runs
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 0.539 ms       1.196 ms   0.45x
+  p50                                  0.507 ms       1.169 ms
+  p95                                  0.675 ms       1.738 ms
+  p99                                  1.413 ms       1.767 ms
+  Min                                  0.387 ms       0.776 ms
+  Max                                  1.413 ms       1.767 ms
+
+================================================================================
+  PRICE STREAM THROUGHPUT — 100 x price_change messages (870 bytes each)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Total time                           13.71 ms        9.04 ms
+  Msgs / sec                               7293          11063   1.52x
+
+================================================================================
+  ORDERBOOK BURST — 30 full-depth updates (765 bytes each)
+  Per-message average over 30-message burst  (5 runs)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 0.198 ms       0.097 ms   2.04x
+  p50                                  0.123 ms       0.098 ms
+  p95                                  0.341 ms       0.109 ms
+  Min                                   0.12 ms       0.077 ms
+  Max                                  0.341 ms       0.109 ms
+
+================================================================================
+  HEARTBEAT PING/PONG ROUND-TRIP — text frame (n=15)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 1.609 ms       0.637 ms   2.53x
+  p50                                  0.505 ms        0.52 ms
+  p95                                 10.484 ms       1.016 ms
+  Min                                   0.31 ms       0.348 ms
+  Max                                 10.484 ms       1.016 ms
+
+================================================================================
+  RECONNECT RECOVERY — close -> new connect -> first message  (n=10)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 3.658 ms       5.252 ms   0.70x
+  p50                                  3.241 ms       3.749 ms
+  p95                                  7.442 ms      13.131 ms
+  Min                                  2.772 ms       3.535 ms
+  Max                                  7.442 ms      13.131 ms
+
+================================================================================
+  BATCH SUBSCRIPTION — 30-token subscribe -> first response  (n=20)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 0.323 ms       0.913 ms   0.35x
+  p50                                  0.316 ms       0.826 ms
+  p95                                  0.376 ms        1.22 ms
+  Min                                   0.29 ms       0.713 ms
+  Max                                  0.382 ms        1.33 ms
+
+================================================================================
+  END OF REPORT
+================================================================================

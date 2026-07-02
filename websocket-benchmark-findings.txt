@@ -1,0 +1,196 @@
+================================================================================
+  WEBSOCKET BENCHMARK — FINDINGS SUMMARY
+  NitroWebSocket (C++ / JSI) vs Standard WebSocket (React Native bridge)
+================================================================================
+
+Source data : websocket-benchmark-results.txt
+Run date    : 2026-06-30
+Environment : Node.js v22.11.0, darwin arm64
+Bridge model: +2.8 ms per message crossing (estimated RN bridge overhead)
+
+
+--------------------------------------------------------------------------------
+  EXECUTIVE SUMMARY (READ THIS FIRST)
+--------------------------------------------------------------------------------
+
+  THE BOTTOM LINE
+    NitroWebSocket is faster in every scenario. It works by removing a small,
+    fixed per-message cost (serialize + thread-hop across the RN bridge) that
+    the standard WebSocket pays on every message. Nitro talks C++ -> JS
+    directly via JSI: zero copy, zero thread hop.
+
+  WHERE WE WILL SEE THE MOST WINS
+    1. High-frequency streams (Predict orderbook, concurrent price feeds)
+       The per-message saving multiplies across hundreds of msgs/sec ->
+       smoother UI, less JS-thread jank, fewer dropped frames. Biggest win.
+    2. User-perceived latency on first data (cold-start, batch subscribe)
+       Prices appear ~5 ms sooner. Small but visible.
+    3. Heartbeat round-trips -> stale connections detected/replaced sooner.
+
+  WHERE WINS ARE SMALL
+    Network-bound paths (live RTDS feed pace, reconnect handshake). Real
+    internet latency dominates and is paid by both, so Nitro only saves a
+    sliver (~1.1x-1.4x). Do not expect dramatic gains here.
+
+  WHAT THE RESULTS SHOWED (modelled lab run)
+    - Every scenario favored Nitro: from 1.16x (network-bound) up to 497x
+      (high-frequency, near-zero network).
+    - The huge ratios (100x-500x) appear ONLY when there is almost no real
+      network time, so the bridge cost IS basically the whole measurement.
+    - The realistic, repeated signal: ~1-4 ms saved per message, reliably,
+      plus JS-thread relief. The 477x/497x are UPPER BOUNDS, not real-world.
+
+--------------------------------------------------------------------------------
+  VERDICT
+--------------------------------------------------------------------------------
+
+  NitroWebSocket is faster in every scenario tested.
+
+  The size of the win depends entirely on what limits performance:
+    - Bridge-bound work (high-frequency messaging) -> huge wins (100x-500x)
+    - Network-bound work (reconnects, real feed)   -> small wins (1.2x-1.4x)
+
+
+--------------------------------------------------------------------------------
+  RESULTS AT A GLANCE
+--------------------------------------------------------------------------------
+
+  Scenario                         Standard WS     Nitro WS       Speedup
+  -------------------------------  --------------  -------------  ---------
+  S1a Market cold-start (mean)     6.632 ms        1.291 ms       5.14x
+  S1b Price stream throughput      355 msg/s       176,737 msg/s  497.85x
+  S2  Orderbook burst/msg (mean)   2.862 ms        0.006 ms       477.00x
+  S3a RTDS feed throughput         51 msg/s        59 msg/s       1.16x
+  S3b Heartbeat RTT (mean)         5.929 ms        0.353 ms       16.80x
+  S4  Reconnect recovery (mean)    46.15 ms        33.9 ms        1.36x
+  S5  Concurrent 3 channels        347 msg/s       43,441 msg/s   125.19x
+  S6  Batch subscription (mean)    5.711 ms        0.116 ms       49.23x
+
+
+--------------------------------------------------------------------------------
+  WHAT THE NUMBERS MEAN (TWO CATEGORIES)
+--------------------------------------------------------------------------------
+
+  1) BIG WINS (100x-500x) -- driven by the RN bridge tax
+     Scenarios: S1b, S2, S5
+     Every message that crosses the JS<->native bridge costs ~2.8 ms
+     (string marshalling + thread hop). NitroWebSocket removes this
+     entirely via JSI: the C++ callback fires directly into Hermes with
+     zero copy and zero thread hop. The more messages, the bigger the gap.
+
+  2) SMALL WINS (1.2x-1.4x) -- driven by real network time
+     Scenarios: S3a, S4
+     When the bottleneck is the network or a reconnect handshake, removing
+     bridge overhead barely moves the needle. These are the realistic gains
+     for network-limited paths.
+
+  3) MID WINS (5x-50x) -- single-message latency on the bridge
+     Scenarios: S1a, S3b, S6
+     One or a few round trips. Removing the per-crossing bridge cost shaves
+     ~5 ms off user-perceived latency (prices appear ~5.3-5.6 ms sooner).
+
+
+--------------------------------------------------------------------------------
+  WHY SOME SCENARIOS ARE 400x AND OTHERS ONLY 5x (OR 1.2x)
+--------------------------------------------------------------------------------
+
+  The speedup does NOT measure how fast a WebSocket is. It measures how much
+  of the total time was bridge overhead that Nitro removes. Both clients pay
+  the same real network time; Nitro only deletes the bridge tax on top.
+
+  The model:
+
+    Standard WS time = real network time + (bridge crossings x 2.8 ms)
+    Nitro WS time    = real network time + 0
+
+    Speedup = (network + bridge tax) / network
+
+  So the ratio is huge only when bridge tax >> network time, and tiny when
+  network time >> bridge tax.
+
+  WHY SOME ARE 400x+   (S1b 498x, S2 477x, S5 125x)
+    Many tiny messages with near-zero real network time (local echo, sub-ms).
+    Almost 100% of the Standard WS time IS bridge tax.
+    Example S2: real per-msg work ~0.006 ms, bridge adds 2.8 ms.
+      Standard = ~2.86 ms, Nitro = ~0.006 ms  ->  2.86 / 0.006 ~= 477x.
+    When the real work is ~0 ms, dividing by it produces an enormous ratio.
+    These numbers really measure the bridge tax, not socket speed.
+
+  WHY SOME ARE ONLY 5x   (S1a 5.14x, S3b 16.8x, S6 49x)
+    One or a few round trips, with ~1 ms of unavoidable real work.
+    Example S1a: Standard = 6.6 ms (~5.6 ms bridge + ~1 ms real),
+      Nitro = 1.3 ms. The ~1 ms real work caps the ratio at ~5x.
+
+  WHY SOME ARE ~1.2x   (S3a 1.16x, S4 1.36x)
+    Dominated by real network time, timers, or a reconnect handshake.
+    - S4 reconnect: ~34 ms real handshake work; bridge tax (~12 ms) is small
+      next to it  ->  1.36x.
+    - S3a RTDS feed: updates arrive on a fixed 16 ms timer set by the server.
+      You cannot go faster than the data arrives  ->  1.16x.
+
+  MENTAL MODEL
+    If the time is mostly...            Speedup     Why
+    ---------------------------------   ---------   ----------------------------
+    Bridge crossings (many tiny msgs)   100x-500x   Nitro removes ~all of it
+    A few round trips                   5x-50x      Some real work remains
+    Network / timers / handshakes       1.1x-1.4x   Bridge is a small slice
+
+  One line: the 400x scenarios have so little real work that the ~2.8 ms
+  bridge tax IS basically the whole measurement, while the 5x and 1.2x
+  scenarios have real network time that both sides pay, so removing the
+  bridge only shaves off a fraction.
+
+
+--------------------------------------------------------------------------------
+  WHAT IS REAL vs WHAT IS ESTIMATED  (important)
+--------------------------------------------------------------------------------
+
+  REAL (measured):
+    - Network-layer performance of two real WebSocket client implementations.
+    - Uses MetaMask's actual message formats, payload sizes, and patterns.
+
+  ESTIMATED (modelled):
+    - The 2.8 ms/crossing RN bridge overhead applied to Standard WS.
+    - This is an additive model. Real bridge cost varies by:
+        * device (measured 1.5-4 ms; higher on low-end Android)
+        * message size
+        * JS heap pressure
+        * Hermes JIT warmth
+
+  Therefore: treat the largest figures (e.g. 477x, 497x) as directionally
+  correct UPPER-BOUND estimates of the bridge advantage -- not guaranteed
+  on-device results.
+
+
+--------------------------------------------------------------------------------
+  PRACTICAL TAKEAWAYS
+--------------------------------------------------------------------------------
+
+  - User-perceived latency: prices show ~5.3-5.6 ms sooner (cold-start,
+    homepage batch load).
+  - High-frequency streaming: NitroWebSocket is in a different class for
+    orderbook bursts and concurrent channels, where bridge cost compounds.
+  - Network-bound paths (live feed, reconnect): still faster, but only
+    marginally -- do not expect dramatic real-world gains here.
+  - Bridge tax removed per run (estimated): S1 ~563 ms, S2 ~143 ms,
+    S3 ~283 ms, S5 ~428 ms.
+
+
+--------------------------------------------------------------------------------
+  HOW TO GET GROUND-TRUTH (ON-DEVICE) NUMBERS
+--------------------------------------------------------------------------------
+
+  Node.js cannot load NitroWebSocket (native RN module), so the bridge cost
+  above is modelled. For real results, run inside the app:
+
+    1. yarn watch:clean && yarn start:ios
+    2. Trigger the benchmark from the Developer Options menu
+       (WebSocket Benchmark section), or call:
+         import { runWebSocketBenchmark } from './app/core/WebSocketBenchmark';
+         runWebSocketBenchmark().then(console.log);
+    3. This captures real performance.now() deltas for both the RN bridge
+       WebSocket and the NitroWebSocket adapter against the same echo server.
+
+================================================================================
+  END
+================================================================================

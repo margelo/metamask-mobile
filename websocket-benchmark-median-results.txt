@@ -1,0 +1,139 @@
+================================================================================
+  WEBSOCKET BENCHMARK — MEDIAN (p50) RESULTS, NITRO-WINS ONLY
+  On-device ground truth — RN bridge WebSocket vs NitroWebSocket
+================================================================================
+
+Run date   : 2026-06-30T16:09:05Z
+Endpoint   : ws://localhost:18765  (local echo server)
+Runtime    : React Native (simulator) — both implementations are REAL
+Filter     : Only scenarios where NitroWebSocket is faster at the MEDIAN (p50)
+             are shown. Scenarios where RN bridge was faster (or tied) are
+             excluded per request.
+
+  Why median (p50) instead of mean? The median ignores one-off spikes
+  (GC pauses, scheduler jitter) that distort small-sample means. It answers
+  "what does a typical message actually experience?"
+
+
+--------------------------------------------------------------------------------
+  NITRO WINS — MEDIAN LATENCY (p50)
+--------------------------------------------------------------------------------
+
+  Scenario                       RN bridge p50   Nitro p50    Nitro saves   Speedup
+  -----------------------------  -------------   ----------   -----------   -------
+  Orderbook burst (per msg)      0.123 ms        0.098 ms     0.025 ms      1.26x
+
+  Read: on a full-depth orderbook stream, the typical (median) message is
+  processed ~0.025 ms faster with Nitro — and its tail is far tighter
+  (p95: RN 0.341 ms vs Nitro 0.109 ms).
+
+
+--------------------------------------------------------------------------------
+  NITRO WINS — THROUGHPUT (no median; bulk rate)
+--------------------------------------------------------------------------------
+
+  Scenario                       RN bridge        Nitro         Speedup
+  -----------------------------  --------------   -----------   -------
+  Price stream throughput        7,293 msg/s      11,063 msg/s  1.52x
+
+  Read: pushing 100 price_change messages, Nitro sustains ~52% higher
+  throughput (total time 13.71 ms -> 9.04 ms).
+
+
+--------------------------------------------------------------------------------
+  EXCLUDED (RN bridge was faster or tied at the median)
+--------------------------------------------------------------------------------
+
+  Per request, the data for these is not shown — Nitro did NOT win at p50:
+    - Cold-start latency        (RN faster at p50)
+    - Heartbeat PING/PONG RTT   (tied/RN faster at p50; Nitro only wins on tail)
+    - Reconnect recovery        (RN faster at p50)
+    - Batch subscription        (RN faster at p50)
+
+  Takeaway: Nitro's clear median wins are in BULK / high-frequency message
+  processing. For one-off connect/subscribe operations the lightweight bridge
+  path is as fast or faster at the median on this simulator run.
+
+
+================================================================================
+  RAW REPORT (full, unfiltered — as emitted by the in-app benchmark)
+================================================================================
+
+================================================================================
+  METAMASK IN-APP WEBSOCKET BENCHMARK — GROUND TRUTH RESULTS
+  Measured inside React Native runtime — real bridge vs real JSI timings
+================================================================================
+
+Run date   : 2026-06-30T16:09:05.440Z
+Completed  : 2026-06-30T16:09:08.148Z
+Echo server: ws://localhost:18765
+
+================================================================================
+  MESSAGE LATENCY — Subscribe -> first price_change received
+  10-token batch price_change message  n=20 runs
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 0.539 ms       1.196 ms   0.45x
+  p50                                  0.507 ms       1.169 ms
+  p95                                  0.675 ms       1.738 ms
+  p99                                  1.413 ms       1.767 ms
+  Min                                  0.387 ms       0.776 ms
+  Max                                  1.413 ms       1.767 ms
+
+================================================================================
+  PRICE STREAM THROUGHPUT — 100 x price_change messages (870 bytes each)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Total time                           13.71 ms        9.04 ms
+  Msgs / sec                               7293          11063   1.52x
+
+================================================================================
+  ORDERBOOK BURST — 30 full-depth updates (765 bytes each)
+  Per-message average over 30-message burst  (5 runs)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 0.198 ms       0.097 ms   2.04x
+  p50                                  0.123 ms       0.098 ms
+  p95                                  0.341 ms       0.109 ms
+  Min                                   0.12 ms       0.077 ms
+  Max                                  0.341 ms       0.109 ms
+
+================================================================================
+  HEARTBEAT PING/PONG ROUND-TRIP — text frame (n=15)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 1.609 ms       0.637 ms   2.53x
+  p50                                  0.505 ms        0.52 ms
+  p95                                 10.484 ms       1.016 ms
+  Min                                   0.31 ms       0.348 ms
+  Max                                 10.484 ms       1.016 ms
+
+================================================================================
+  RECONNECT RECOVERY — close -> new connect -> first message  (n=10)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 3.658 ms       5.252 ms   0.70x
+  p50                                  3.241 ms       3.749 ms
+  p95                                  7.442 ms      13.131 ms
+  Min                                  2.772 ms       3.535 ms
+  Max                                  7.442 ms      13.131 ms
+
+================================================================================
+  BATCH SUBSCRIPTION — 30-token subscribe -> first response  (n=20)
+================================================================================
+
+  Metric                           RN WebSocket   NitroWebSocket   Speedup
+  Mean                                 0.323 ms       0.913 ms   0.35x
+  p50                                  0.316 ms       0.826 ms
+  p95                                  0.376 ms        1.22 ms
+  Min                                   0.29 ms       0.713 ms
+  Max                                  0.382 ms        1.33 ms
+
+================================================================================
+  END OF REPORT
+================================================================================

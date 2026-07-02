@@ -49,6 +49,20 @@ if (__DEV__) {
   require('./ReactotronConfig');
 }
 
+if (__DEV__) {
+  setTimeout(() => {
+    console.log('[WS Bench] Timer fired — loading benchmark…');
+    try {
+      const { runWebSocketBenchmark } = require('./app/core/WebSocketBenchmark');
+      runWebSocketBenchmark({ echoUrl: 'ws://localhost:18765' })
+        .then((report) => console.log(report))
+        .catch((err) => console.error('[WS Bench] Runtime error:', err));
+    } catch (err) {
+      console.error('[WS Bench] Failed to load benchmark module:', err);
+    }
+  }, 5000);
+}
+
 enableFreeze(true);
 
 // Setup Sentry

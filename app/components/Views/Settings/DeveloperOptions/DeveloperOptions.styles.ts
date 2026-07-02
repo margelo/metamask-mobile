@@ -22,6 +22,20 @@ const styleSheet = (params: { theme: Theme }) => {
     accessory: {
       marginTop: 16,
     },
+    urlInput: {
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: colors.border.default,
+      borderRadius: 8,
+      padding: 12,
+      color: colors.text.default,
+    },
+    panel: {
+      marginTop: 16,
+      backgroundColor: colors.background.alternative,
+      borderRadius: 8,
+      padding: 12,
+    },
   });
 };
 

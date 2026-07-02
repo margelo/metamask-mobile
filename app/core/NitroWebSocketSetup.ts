@@ -270,6 +270,24 @@ class NitroWebSocketAdapter {
   }
 }
 
+/**
+ * The original React Native bridge-based WebSocket, captured at module load
+ * BEFORE {@link installProductionNitroWebSocket} replaces `global.WebSocket`.
+ * Exposed so diagnostics/benchmarks can still construct the bridge implementation
+ * to compare it against the native NitroWebSocket. May be `undefined` in
+ * environments where RN core has not installed `global.WebSocket` (e.g. tests).
+ */
+export const ReactNativeWebSocket: typeof WebSocket | undefined =
+  typeof global !== 'undefined'
+    ? (global.WebSocket as typeof WebSocket | undefined)
+    : undefined;
+
+// Capture the original React Native bridge-based WebSocket before replacing it.
+// Exported so WebSocketBenchmark can compare both implementations head-to-head
+// inside the real RN runtime (real bridge latency vs real JSI latency).
+export const OriginalRNWebSocket: typeof WebSocket | undefined =
+  typeof global.WebSocket !== 'undefined' ? global.WebSocket : undefined;
+
 export function installProductionNitroWebSocket(): void {
   global.WebSocket = NitroWebSocketAdapter as unknown as typeof WebSocket;
 }
